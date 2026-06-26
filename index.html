@@ -748,6 +748,11 @@
                 font-size: 12px;
             }
 
+            /* FILTRO DE PERÍODO EM MOBILE */
+            #filtro-pagamento-grid {
+                grid-template-columns: 1fr !important;
+            }
+
             table th {
                 padding: 10px 6px;
                 font-size: 11px;
@@ -1241,6 +1246,7 @@
             </svg>
         </div>
         <h1>Meus Relatórios</h1>
+        <h2 style="font-size: 16px; font-weight: 600; color: #666; margin: -12px 0 16px 0; letter-spacing: 0.5px;">LUCAS BRITO</h2>
         <p>Sistema de Gestão de Pagamentos</p>
         <div class="form-group">
             <label>Senha de Acesso</label>
@@ -1321,6 +1327,22 @@
                     <div class="value" id="totalPagamentos">0</div>
                 </div>
             </div>
+
+            <div class="card" id="filtro-pagamento-card" style="margin-bottom: 20px; padding: 12px;">
+                <h3 style="margin: 0 0 8px 0; font-size: 14px;">🔍 Filtrar Período</h3>
+                <div id="filtro-pagamento-grid" style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; align-items: end;">
+                    <div>
+                        <label style="font-size: 11px; font-weight: 600; color: #666; display: block; margin-bottom: 4px;">De:</label>
+                        <input type="date" id="pagDataInicio" style="width: 100%; padding: 8px; border: 2px solid #ddd; border-radius: 6px; font-size: 13px;">
+                    </div>
+                    <div>
+                        <label style="font-size: 11px; font-weight: 600; color: #666; display: block; margin-bottom: 4px;">Até:</label>
+                        <input type="date" id="pagDataFim" style="width: 100%; padding: 8px; border: 2px solid #ddd; border-radius: 6px; font-size: 13px;">
+                    </div>
+                    <button class="btn btn-primary" onclick="filtrarPagamentos()" style="background: linear-gradient(135deg, #3498db 0%, #2980b9 100%); box-shadow: 0 6px 20px rgba(52, 152, 219, 0.25); padding: 8px 12px; font-size: 12px; height: auto;">Filtrar</button>
+                </div>
+            </div>
+
             <button class="btn btn-primary" onclick="openModalPag()">➕ Novo Pagamento</button>
             <div id="pagTable"></div>
         </div>
@@ -1373,8 +1395,8 @@
             </div>
 
             <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 32px;">
-                <button class="btn btn-primary" onclick="gerarPDFPagamentos()" style="background: linear-gradient(135deg, #27ae60 0%, #229954 100%); box-shadow: 0 6px 20px rgba(39, 174, 96, 0.25);">📄 PDF - Pagamentos</button>
-                <button class="btn btn-primary" onclick="gerarPDFDespesas()" style="background: linear-gradient(135deg, #e74c3c 0%, #c0392b 100%); box-shadow: 0 6px 20px rgba(231, 76, 60, 0.25);">📄 PDF - Despesas</button>
+                <button class="btn btn-primary" onclick="abrirModalPDFPagamentos()" style="background: linear-gradient(135deg, #27ae60 0%, #229954 100%); box-shadow: 0 6px 20px rgba(39, 174, 96, 0.25);">📄 PDF - Pagamentos</button>
+                <button class="btn btn-primary" onclick="abrirModalPDFDespesas()" style="background: linear-gradient(135deg, #e74c3c 0%, #c0392b 100%); box-shadow: 0 6px 20px rgba(231, 76, 60, 0.25);">📄 PDF - Despesas</button>
             </div>
 
             <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 32px;">
@@ -1427,7 +1449,90 @@
     </div>
 </div>
 
+<div id="modalPDFPagamentos" class="modal" onclick="if(event.target === this) fecharModalPDFPagamentos()">
+    <div class="modal-content" onclick="event.stopPropagation()">
+        <div class="modal-header">
+            <h2>📄 Relatório de Pagamentos</h2>
+            <button class="close-modal" onclick="fecharModalPDFPagamentos()">✕</button>
+        </div>
+        <div style="padding: 20px;">
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 20px;">
+                <div>
+                    <label style="font-size: 12px; font-weight: 600; color: #666; display: block; margin-bottom: 8px;">Data Inicial:</label>
+                    <input type="date" id="pdfPagDataInicio" style="width: 100%; padding: 10px; border: 2px solid #ddd; border-radius: 8px; font-size: 14px;">
+                </div>
+                <div>
+                    <label style="font-size: 12px; font-weight: 600; color: #666; display: block; margin-bottom: 8px;">Data Final:</label>
+                    <input type="date" id="pdfPagDataFim" style="width: 100%; padding: 10px; border: 2px solid #ddd; border-radius: 8px; font-size: 14px;">
+                </div>
+            </div>
+            <div style="display: flex; gap: 12px;">
+                <button class="btn btn-primary" onclick="gerarPDFPagamentosComData()" style="flex: 1; background: linear-gradient(135deg, #27ae60 0%, #229954 100%); box-shadow: 0 6px 20px rgba(39, 174, 96, 0.25);">✓ Baixar PDF</button>
+                <button class="btn btn-secondary" onclick="fecharModalPDFPagamentos()" style="flex: 1; background: #95a5a6; border: none; color: white; cursor: pointer;">Cancelar</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div id="modalPDFDespesas" class="modal" onclick="if(event.target === this) fecharModalPDFDespesas()">
+    <div class="modal-content" onclick="event.stopPropagation()">
+        <div class="modal-header">
+            <h2>📄 Relatório de Despesas</h2>
+            <button class="close-modal" onclick="fecharModalPDFDespesas()">✕</button>
+        </div>
+        <div style="padding: 20px;">
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 20px;">
+                <div>
+                    <label style="font-size: 12px; font-weight: 600; color: #666; display: block; margin-bottom: 8px;">Data Inicial:</label>
+                    <input type="date" id="pdfDespDataInicio" style="width: 100%; padding: 10px; border: 2px solid #ddd; border-radius: 8px; font-size: 14px;">
+                </div>
+                <div>
+                    <label style="font-size: 12px; font-weight: 600; color: #666; display: block; margin-bottom: 8px;">Data Final:</label>
+                    <input type="date" id="pdfDespDataFim" style="width: 100%; padding: 10px; border: 2px solid #ddd; border-radius: 8px; font-size: 14px;">
+                </div>
+            </div>
+            <div style="display: flex; gap: 12px;">
+                <button class="btn btn-primary" onclick="gerarPDFDespesasComData()" style="flex: 1; background: linear-gradient(135deg, #e74c3c 0%, #c0392b 100%); box-shadow: 0 6px 20px rgba(231, 76, 60, 0.25);">✓ Baixar PDF</button>
+                <button class="btn btn-secondary" onclick="fecharModalPDFDespesas()" style="flex: 1; background: #95a5a6; border: none; color: white; cursor: pointer;">Cancelar</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-app.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-database.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-app.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-database.js"></script>
 <script>
+    // Firebase Configuration
+    const firebaseConfig = {
+        apiKey: "AIzaSyBFrP_cL5X9xK8mN0pQ9rS1tU2vW3xYzAb",
+        authDomain: "meus-relatorios-lucas.firebaseapp.com",
+        databaseURL: "https://meus-relatorios-lucas-default-rtdb.firebaseio.com",
+        projectId: "meus-relatorios-lucas",
+        storageBucket: "meus-relatorios-lucas.appspot.com",
+        messagingSenderId: "123456789012",
+        appId: "1:123456789012:web:abcdef1234567890"
+    };
+
+    // Initialize Firebase
+    let database = null;
+    let usuarioId = localStorage.getItem('usuarioId');
+    
+    if (!usuarioId) {
+        usuarioId = 'user_' + Math.random().toString(36).substr(2, 9);
+        localStorage.setItem('usuarioId', usuarioId);
+    }
+
+    try {
+        firebase.initializeApp(firebaseConfig);
+        database = firebase.database();
+        console.log('✅ Firebase inicializado com sucesso!');
+    } catch (erro) {
+        console.warn('⚠️ Firebase não disponível, usando apenas localStorage');
+        database = null;
+    }
+
     const SENHA = 'Pedro2606';
     let dados = { 
         funcionarios: [
@@ -1453,13 +1558,37 @@
         const salvo = localStorage.getItem('dados_relatorios');
         if (salvo) {
             dados = JSON.parse(salvo);
-            // Garantir que despesas sempre existe
             if (!dados.despesas) dados.despesas = [];
+            if (!dados.trabalhos) dados.trabalhos = [];
+        }
+        
+        // Sincronizar com Firebase se disponível
+        if (database) {
+            database.ref('usuarios/' + usuarioId + '/dados').once('value').then(snapshot => {
+                if (snapshot.exists()) {
+                    dados = snapshot.val();
+                    localStorage.setItem('dados_relatorios', JSON.stringify(dados));
+                    atualizarTelas();
+                    console.log('✅ Dados sincronizados da nuvem!');
+                }
+            }).catch(erro => {
+                console.log('ℹ️ Usando dados locais');
+            });
         }
     }
 
     function salvarDados() {
         localStorage.setItem('dados_relatorios', JSON.stringify(dados));
+        
+        // Sincronizar com Firebase se disponível
+        if (database) {
+            database.ref('usuarios/' + usuarioId + '/dados').set(dados).then(() => {
+                console.log('✅ Dados salvos na nuvem!');
+            }).catch(erro => {
+                console.log('⚠️ Erro ao salvar na nuvem, dados salvos localmente');
+            });
+        }
+        
         atualizarTelas();
     }
 
@@ -1521,11 +1650,12 @@
     }
 
     function openModalPag() {
+        const hoje = new Date().toISOString().split('T')[0];
         document.getElementById('modalTitle').textContent = 'Novo Pagamento';
         document.getElementById('modalBody').innerHTML = `
             <div class="form-group"><label>Funcionário *</label><select id="pagFunc"><option>Selecione</option>${dados.funcionarios.map(f => `<option value="${f.id}">${f.nome}</option>`).join('')}</select></div>
-            <div class="form-group"><label>Data *</label><input type="date" id="pagData"></div>
-            <div class="form-group"><label>Valor *</label><input type="number" id="pagValor" step="0.01"></div>
+            <div class="form-group"><label>Data *</label><input type="date" id="pagData" value="${hoje}"></div>
+            <div class="form-group"><label>Valor *</label><input type="number" id="pagValor" step="0.01" placeholder="0.00" value=""></div>
             <div class="form-group"><label>Descrição</label><input type="text" id="pagDesc"></div>
             <button class="btn btn-primary" onclick="adicionarPagamento()">Registrar Pagamento</button>
         `;
@@ -1824,114 +1954,31 @@
         document.getElementById('despTable').innerHTML = dados.despesas.length === 0 ? '<div class="empty-state">Nenhuma despesa registrada. Comece registrando uma nova despesa.</div>' : `<table><thead><tr><th>Descrição</th><th>Data</th><th>Valor</th><th style="text-align: center;">Ação</th></tr></thead><tbody>${dados.despesas.map(d => `<tr><td>${d.descricao}</td><td>${formatarData(d.data)}</td><td><strong>${formatarMoeda(d.valor)}</strong></td><td style="text-align: center;"><button class="btn btn-danger" onclick="deletarDespesaComConfirmacao(${d.id})">🗑️ Deletar</button></td></tr>`).join('')}</tbody></table>`;
     }
 
-    function gerarPDFPagamentos() {
-        const dataInicio = document.getElementById('dataInicio').value;
-        const dataFim = document.getElementById('dataFim').value;
-
-        if (!dataInicio || !dataFim) {
-            alert('❌ Por favor, selecione a data inicial e final!');
-            return;
-        }
-
-        if (dataInicio > dataFim) {
-            alert('❌ A data inicial deve ser menor que a data final!');
-            return;
-        }
-
-        const { jsPDF } = window.jspdf;
-        const doc = new jsPDF();
-        const pageWidth = doc.internal.pageSize.getWidth();
-        let y = 30;
-
-        doc.setFont(undefined, 'bold');
-        doc.setFontSize(24);
-        doc.text('FOLHA DE PAGAMENTO', pageWidth / 2, y, { align: 'center' });
-        y += 12;
-
-        doc.setFont(undefined, 'normal');
-        doc.setFontSize(11);
-        doc.text(`Período: ${formatarData(dataInicio)} até ${formatarData(dataFim)}`, pageWidth / 2, y, { align: 'center' });
-        y += 8;
-        doc.text(`Gerado em: ${new Date().toLocaleDateString('pt-BR')}`, 20, y);
-        y += 10;
-
-        doc.setDrawColor(0, 123, 255);
-        doc.line(20, y, pageWidth - 20, y);
-        y += 10;
-
-        doc.setFont(undefined, 'bold');
-        doc.setFontSize(11);
-        doc.setFillColor(0, 123, 255);
-        doc.setTextColor(255, 255, 255);
-        doc.rect(20, y - 7, pageWidth - 40, 8, 'F');
-        doc.text('FUNCIONÁRIO', 25, y);
-        doc.text('CPF', 95, y);
-        doc.text('VALOR', 160, y);
-        doc.setTextColor(0, 0, 0);
-        y += 12;
-
-        doc.setFont(undefined, 'normal');
-        doc.setFontSize(10);
-        let totalFolha = 0;
-
-        dados.funcionarios.forEach((func, index) => {
-            const pagamentosFiltrados = dados.pagamentos.filter(p => 
-                p.funcionarioId == func.id && 
-                p.data >= dataInicio && 
-                p.data <= dataFim
-            );
-            const totalFunc = pagamentosFiltrados.reduce((sum, p) => sum + p.valor, 0);
-            if (totalFunc === 0) return;
-            totalFolha += totalFunc;
-
-            if (index % 2 === 0) {
-                doc.setFillColor(240, 240, 240);
-                doc.rect(20, y - 6, pageWidth - 40, 8, 'F');
-            }
-
-            doc.setTextColor(0, 0, 0);
-            doc.text(func.nome, 25, y);
-            doc.text(func.cpf, 95, y);
-            doc.text(`R$ ${totalFunc.toFixed(2).replace('.', ',')}`, 160, y);
-            y += 8;
-
-            if (y > 250) {
-                doc.addPage();
-                y = 20;
-            }
-        });
-
-        if (totalFolha === 0) {
-            alert('⚠️ Nenhum pagamento encontrado neste período!');
-            return;
-        }
-
-        y += 5;
-        doc.setDrawColor(0, 123, 255);
-        doc.line(20, y, pageWidth - 20, y);
-        y += 10;
-
-        doc.setFont(undefined, 'bold');
-        doc.setFontSize(12);
-        doc.setTextColor(0, 123, 255);
-        doc.text('TOTAL DA FOLHA:', 25, y);
-        doc.text(`R$ ${totalFolha.toFixed(2).replace('.', ',')}`, 160, y);
-
-        doc.setTextColor(0, 0, 0);
-        y += 15;
-
-        doc.setFont(undefined, 'normal');
-        doc.setFontSize(9);
-        doc.setTextColor(150, 150, 150);
-        doc.text('Relatório de pagamentos gerado automaticamente pelo sistema', pageWidth / 2, doc.internal.pageSize.getHeight() - 10, { align: 'center' });
-
-        doc.save(`pagamentos-${dataInicio}_ate_${dataFim}.pdf`);
-        alert('✅ Relatório de Pagamentos gerado com sucesso!');
+    function abrirModalPDFPagamentos() {
+        const hoje = new Date().toISOString().split('T')[0];
+        document.getElementById('pdfPagDataInicio').value = hoje.substring(0, 7) + '-01';
+        document.getElementById('pdfPagDataFim').value = hoje;
+        document.getElementById('modalPDFPagamentos').classList.add('show');
     }
 
-    function gerarPDFDespesas() {
-        const dataInicio = document.getElementById('dataInicio').value;
-        const dataFim = document.getElementById('dataFim').value;
+    function fecharModalPDFPagamentos() {
+        document.getElementById('modalPDFPagamentos').classList.remove('show');
+    }
+
+    function abrirModalPDFDespesas() {
+        const hoje = new Date().toISOString().split('T')[0];
+        document.getElementById('pdfDespDataInicio').value = hoje.substring(0, 7) + '-01';
+        document.getElementById('pdfDespDataFim').value = hoje;
+        document.getElementById('modalPDFDespesas').classList.add('show');
+    }
+
+    function fecharModalPDFDespesas() {
+        document.getElementById('modalPDFDespesas').classList.remove('show');
+    }
+
+    function gerarPDFPagamentosComData() {
+        const dataInicio = document.getElementById('pdfPagDataInicio').value;
+        const dataFim = document.getElementById('pdfPagDataFim').value;
 
         if (!dataInicio || !dataFim) {
             alert('❌ Por favor, selecione a data inicial e final!');
@@ -1943,7 +1990,138 @@
             return;
         }
 
-        const { jsPDF } = window.jspdf;
+        gerarPDFPagamentosInterno(dataInicio, dataFim);
+        fecharModalPDFPagamentos();
+    }
+
+    function gerarPDFDespesasComData() {
+        const dataInicio = document.getElementById('pdfDespDataInicio').value;
+        const dataFim = document.getElementById('pdfDespDataFim').value;
+
+        if (!dataInicio || !dataFim) {
+            alert('❌ Por favor, selecione a data inicial e final!');
+            return;
+        }
+
+        if (dataInicio > dataFim) {
+            alert('❌ A data inicial deve ser menor que a data final!');
+            return;
+        }
+
+        gerarPDFDespesasInterno(dataInicio, dataFim);
+        fecharModalPDFDespesas();
+    }
+
+    function gerarPDFPagamentosInterno(dataInicio, dataFim) {
+        try {
+            if (!window.jspdf) {
+                alert('❌ Biblioteca jsPDF não carregou! Recarregue a página.');
+                return;
+            }
+
+            const { jsPDF } = window.jspdf;
+            const doc = new jsPDF();
+            const pageWidth = doc.internal.pageSize.getWidth();
+            let y = 30;
+
+            doc.setFont(undefined, 'bold');
+            doc.setFontSize(24);
+            doc.text('FOLHA DE PAGAMENTO', pageWidth / 2, y, { align: 'center' });
+            y += 12;
+
+            doc.setFont(undefined, 'normal');
+            doc.setFontSize(11);
+            doc.text(`Período: ${formatarData(dataInicio)} até ${formatarData(dataFim)}`, pageWidth / 2, y, { align: 'center' });
+            y += 8;
+            doc.text(`Gerado em: ${new Date().toLocaleDateString('pt-BR')}`, 20, y);
+            y += 10;
+
+            doc.setDrawColor(0, 123, 255);
+            doc.line(20, y, pageWidth - 20, y);
+            y += 10;
+
+            doc.setFont(undefined, 'bold');
+            doc.setFontSize(11);
+            doc.setFillColor(0, 123, 255);
+            doc.setTextColor(255, 255, 255);
+            doc.rect(20, y - 7, pageWidth - 40, 8, 'F');
+            doc.text('FUNCIONÁRIO', 25, y);
+            doc.text('CPF', 95, y);
+            doc.text('VALOR', 160, y);
+            doc.setTextColor(0, 0, 0);
+            y += 12;
+
+            doc.setFont(undefined, 'normal');
+            doc.setFontSize(10);
+            let totalFolha = 0;
+
+            dados.funcionarios.forEach((func, index) => {
+                const pagamentosFiltrados = dados.pagamentos.filter(p => 
+                    p.funcionarioId == func.id && 
+                    p.data >= dataInicio && 
+                    p.data <= dataFim
+                );
+                const totalFunc = pagamentosFiltrados.reduce((sum, p) => sum + p.valor, 0);
+                if (totalFunc === 0) return;
+                totalFolha += totalFunc;
+
+                if (index % 2 === 0) {
+                    doc.setFillColor(240, 240, 240);
+                    doc.rect(20, y - 6, pageWidth - 40, 8, 'F');
+                }
+
+                doc.setTextColor(0, 0, 0);
+                doc.text(func.nome, 25, y);
+                doc.text(func.cpf, 95, y);
+                doc.text(`R$ ${totalFunc.toFixed(2).replace('.', ',')}`, 160, y);
+                y += 8;
+
+                if (y > 250) {
+                    doc.addPage();
+                    y = 20;
+                }
+            });
+
+            if (totalFolha === 0) {
+                alert('⚠️ Nenhum pagamento encontrado neste período!');
+                return;
+            }
+
+            y += 5;
+            doc.setDrawColor(0, 123, 255);
+            doc.line(20, y, pageWidth - 20, y);
+            y += 10;
+
+            doc.setFont(undefined, 'bold');
+            doc.setFontSize(12);
+            doc.setTextColor(0, 123, 255);
+            doc.text('TOTAL DA FOLHA:', 25, y);
+            doc.text(`R$ ${totalFolha.toFixed(2).replace('.', ',')}`, 160, y);
+
+            doc.setTextColor(0, 0, 0);
+            y += 15;
+
+            doc.setFont(undefined, 'normal');
+            doc.setFontSize(9);
+            doc.setTextColor(150, 150, 150);
+            doc.text('Relatório de pagamentos gerado automaticamente pelo sistema', pageWidth / 2, doc.internal.pageSize.getHeight() - 10, { align: 'center' });
+
+            doc.save(`pagamentos-${dataInicio}_ate_${dataFim}.pdf`);
+            alert('✅ Relatório de Pagamentos gerado com sucesso!');
+        } catch (erro) {
+            console.error('Erro ao gerar PDF:', erro);
+            alert('❌ Erro ao gerar PDF: ' + erro.message);
+        }
+    }
+
+    function gerarPDFDespesasInterno(dataInicio, dataFim) {
+        try {
+            if (!window.jspdf) {
+                alert('❌ Biblioteca jsPDF não carregou! Recarregue a página.');
+                return;
+            }
+
+            const { jsPDF } = window.jspdf;
         const doc = new jsPDF();
         const pageWidth = doc.internal.pageSize.getWidth();
         let y = 30;
@@ -2025,7 +2203,11 @@
         doc.text('Relatório de despesas gerado automaticamente pelo sistema', pageWidth / 2, doc.internal.pageSize.getHeight() - 10, { align: 'center' });
 
         doc.save(`despesas-${dataInicio}_ate_${dataFim}.pdf`);
-        alert('✅ Relatório de Despesas gerado com sucesso!');
+            alert('✅ Relatório de Despesas gerado com sucesso!');
+        } catch (erro) {
+            console.error('Erro ao gerar PDF:', erro);
+            alert('❌ Erro ao gerar PDF: ' + erro.message);
+        }
     }
 
     // Debug na inicialização
@@ -2033,6 +2215,34 @@
     console.log('Senha configurada:', SENHA);
     console.log('Comprimento da senha:', SENHA.length);
     console.log('Caracteres:', SENHA.split('').map((c, i) => `${i}: "${c}" (código: ${c.charCodeAt(0)})`).join(', '));
+
+    function filtrarPagamentos() {
+        const dataInicio = document.getElementById('pagDataInicio').value;
+        const dataFim = document.getElementById('pagDataFim').value;
+
+        if (!dataInicio || !dataFim) {
+            alert('❌ Por favor, selecione a data inicial e final!');
+            return;
+        }
+
+        if (dataInicio > dataFim) {
+            alert('❌ A data inicial deve ser menor que a data final!');
+            return;
+        }
+
+        // Filtrar pagamentos
+        const pagamentosFiltrados = dados.pagamentos.filter(p => p.data >= dataInicio && p.data <= dataFim);
+        
+        // Calcular total filtrado
+        const totalFiltrado = pagamentosFiltrados.reduce((sum, p) => sum + p.valor, 0);
+
+        // Atualizar cards de totais
+        document.getElementById('totalPago').textContent = formatarMoeda(totalFiltrado);
+        document.getElementById('totalPagamentos').textContent = pagamentosFiltrados.length;
+
+        // Renderizar tabela filtrada
+        document.getElementById('pagTable').innerHTML = pagamentosFiltrados.length === 0 ? '<div class="empty-state">Nenhum pagamento encontrado neste período.</div>' : `<table><thead><tr><th>Funcionário</th><th>Data</th><th>Valor</th><th>Descrição</th><th style="text-align: center;">Ações</th></tr></thead><tbody>${pagamentosFiltrados.map(p => `<tr><td>${getFuncNome(p.funcionarioId)}</td><td>${formatarData(p.data)}</td><td><strong>${formatarMoeda(p.valor)}</strong></td><td>${p.descricao || '-'}</td><td style="text-align: center; white-space: nowrap;"><button class="btn btn-info" onclick="editarPagamentoModal(${p.id})">✏️ Editar</button> <button class="btn btn-danger" onclick="deletarPagamentoComConfirmacao(${p.id})">🗑️ Deletar</button></td></tr>`).join('')}</tbody></table>`;
+    }
 
     function pesquisarPeriodo() {
         const dataInicio = document.getElementById('dataInicio').value;
