@@ -1814,119 +1814,129 @@
     }
 
     function gerarPDFIndividualModal() {
-        const funcId = document.getElementById('pdfIndFuncionario').value;
-        const dataInicio = document.getElementById('pdfIndDataInicio').value;
-        const dataFim = document.getElementById('pdfIndDataFim').value;
-
-        if (!funcId) {
-            alert('❌ Por favor, selecione um funcionário!');
-            return;
-        }
-
-        if (!dataInicio || !dataFim) {
-            alert('❌ Por favor, selecione a data inicial e final!');
-            return;
-        }
-
-        if (dataInicio > dataFim) {
-            alert('❌ A data inicial deve ser menor que a data final!');
-            return;
-        }
-
-        const func = dados.funcionarios.find(f => f.id == funcId);
-        const pagamentosFiltrados = dados.pagamentos.filter(p => 
-            p.funcionarioId == funcId && 
-            p.data >= dataInicio && 
-            p.data <= dataFim
-        );
-
-        if (pagamentosFiltrados.length === 0) {
-            alert('⚠️ Nenhum pagamento encontrado para este funcionário neste período!');
-            return;
-        }
-
-        const { jsPDF } = window.jspdf;
-        const doc = new jsPDF();
-        const pageWidth = doc.internal.pageSize.getWidth();
-        let y = 30;
-
-        doc.setFont(undefined, 'bold');
-        doc.setFontSize(24);
-        doc.text('EXTRATO DE PAGAMENTOS', pageWidth / 2, y, { align: 'center' });
-        y += 12;
-
-        doc.setFont(undefined, 'normal');
-        doc.setFontSize(11);
-        doc.text(`Funcionário: ${func.nome}`, 20, y);
-        y += 6;
-        doc.text(`CPF: ${func.cpf}`, 20, y);
-        y += 6;
-        doc.text(`Período: ${formatarData(dataInicio)} até ${formatarData(dataFim)}`, 20, y);
-        y += 6;
-        doc.text(`Gerado em: ${new Date().toLocaleDateString('pt-BR')}`, 20, y);
-        y += 10;
-
-        doc.setDrawColor(0, 123, 255);
-        doc.line(20, y, pageWidth - 20, y);
-        y += 10;
-
-        doc.setFont(undefined, 'bold');
-        doc.setFontSize(11);
-        doc.setFillColor(0, 123, 255);
-        doc.setTextColor(255, 255, 255);
-        doc.rect(20, y - 7, pageWidth - 40, 8, 'F');
-        doc.text('DATA', 25, y);
-        doc.text('DESCRIÇÃO', 70, y);
-        doc.text('VALOR', 160, y);
-        doc.setTextColor(0, 0, 0);
-        y += 12;
-
-        doc.setFont(undefined, 'normal');
-        doc.setFontSize(10);
-        let totalIndividual = 0;
-
-        pagamentosFiltrados.forEach((pag, index) => {
-            totalIndividual += pag.valor;
-
-            if (index % 2 === 0) {
-                doc.setFillColor(240, 240, 240);
-                doc.rect(20, y - 6, pageWidth - 40, 8, 'F');
+        try {
+            if (!window.jspdf) {
+                alert('❌ Biblioteca jsPDF não carregou! Recarregue a página.');
+                return;
             }
+
+            const funcId = document.getElementById('pdfIndFuncionario').value;
+            const dataInicio = document.getElementById('pdfIndDataInicio').value;
+            const dataFim = document.getElementById('pdfIndDataFim').value;
+
+            if (!funcId) {
+                alert('❌ Por favor, selecione um funcionário!');
+                return;
+            }
+
+            if (!dataInicio || !dataFim) {
+                alert('❌ Por favor, selecione a data inicial e final!');
+                return;
+            }
+
+            if (dataInicio > dataFim) {
+                alert('❌ A data inicial deve ser menor que a data final!');
+                return;
+            }
+
+            const func = dados.funcionarios.find(f => f.id == funcId);
+            const pagamentosFiltrados = dados.pagamentos.filter(p => 
+                p.funcionarioId == funcId && 
+                p.data >= dataInicio && 
+                p.data <= dataFim
+            );
+
+            if (pagamentosFiltrados.length === 0) {
+                alert('⚠️ Nenhum pagamento encontrado para este funcionário neste período!');
+                return;
+            }
+
+            const { jsPDF } = window.jspdf;
+            const doc = new jsPDF();
+            const pageWidth = doc.internal.pageSize.getWidth();
+            let y = 30;
+
+            doc.setFont(undefined, 'bold');
+            doc.setFontSize(24);
+            doc.text('EXTRATO DE PAGAMENTOS', pageWidth / 2, y, { align: 'center' });
+            y += 12;
+
+            doc.setFont(undefined, 'normal');
+            doc.setFontSize(11);
+            doc.text(`Funcionário: ${func.nome}`, 20, y);
+            y += 6;
+            doc.text(`CPF: ${func.cpf}`, 20, y);
+            y += 6;
+            doc.text(`Período: ${formatarData(dataInicio)} até ${formatarData(dataFim)}`, 20, y);
+            y += 6;
+            doc.text(`Gerado em: ${new Date().toLocaleDateString('pt-BR')}`, 20, y);
+            y += 10;
+
+            doc.setDrawColor(0, 123, 255);
+            doc.line(20, y, pageWidth - 20, y);
+            y += 10;
+
+            doc.setFont(undefined, 'bold');
+            doc.setFontSize(11);
+            doc.setFillColor(0, 123, 255);
+            doc.setTextColor(255, 255, 255);
+            doc.rect(20, y - 7, pageWidth - 40, 8, 'F');
+            doc.text('DATA', 25, y);
+            doc.text('DESCRIÇÃO', 70, y);
+            doc.text('VALOR', 160, y);
+            doc.setTextColor(0, 0, 0);
+            y += 12;
+
+            doc.setFont(undefined, 'normal');
+            doc.setFontSize(10);
+            let totalIndividual = 0;
+
+            pagamentosFiltrados.forEach((pag, index) => {
+                totalIndividual += pag.valor;
+
+                if (index % 2 === 0) {
+                    doc.setFillColor(240, 240, 240);
+                    doc.rect(20, y - 6, pageWidth - 40, 8, 'F');
+                }
+
+                doc.setTextColor(0, 0, 0);
+                doc.text(formatarData(pag.data), 25, y);
+                doc.text(pag.descricao || '-', 70, y);
+                doc.text(`R$ ${pag.valor.toFixed(2).replace('.', ',')}`, 160, y);
+                y += 8;
+
+                if (y > 250) {
+                    doc.addPage();
+                    y = 20;
+                }
+            });
+
+            y += 5;
+            doc.setDrawColor(0, 123, 255);
+            doc.line(20, y, pageWidth - 20, y);
+            y += 10;
+
+            doc.setFont(undefined, 'bold');
+            doc.setFontSize(12);
+            doc.setTextColor(0, 123, 255);
+            doc.text('TOTAL:', 25, y);
+            doc.text(`R$ ${totalIndividual.toFixed(2).replace('.', ',')}`, 160, y);
 
             doc.setTextColor(0, 0, 0);
-            doc.text(formatarData(pag.data), 25, y);
-            doc.text(pag.descricao || '-', 70, y);
-            doc.text(`R$ ${pag.valor.toFixed(2).replace('.', ',')}`, 160, y);
-            y += 8;
+            y += 15;
 
-            if (y > 250) {
-                doc.addPage();
-                y = 20;
-            }
-        });
+            doc.setFont(undefined, 'normal');
+            doc.setFontSize(9);
+            doc.setTextColor(150, 150, 150);
+            doc.text('Extrato de pagamento gerado automaticamente pelo sistema', pageWidth / 2, doc.internal.pageSize.getHeight() - 10, { align: 'center' });
 
-        y += 5;
-        doc.setDrawColor(0, 123, 255);
-        doc.line(20, y, pageWidth - 20, y);
-        y += 10;
-
-        doc.setFont(undefined, 'bold');
-        doc.setFontSize(12);
-        doc.setTextColor(0, 123, 255);
-        doc.text('TOTAL:', 25, y);
-        doc.text(`R$ ${totalIndividual.toFixed(2).replace('.', ',')}`, 160, y);
-
-        doc.setTextColor(0, 0, 0);
-        y += 15;
-
-        doc.setFont(undefined, 'normal');
-        doc.setFontSize(9);
-        doc.setTextColor(150, 150, 150);
-        doc.text('Extrato de pagamento gerado automaticamente pelo sistema', pageWidth / 2, doc.internal.pageSize.getHeight() - 10, { align: 'center' });
-
-        doc.save(`pagamento_${func.nome}_${dataInicio}_ate_${dataFim}.pdf`);
-        alert('✅ Extrato de Pagamento gerado com sucesso!');
-        closarModalPDFIndividual();
+            doc.save(`pagamento_${func.nome}_${dataInicio}_ate_${dataFim}.pdf`);
+            alert('✅ Extrato de Pagamento gerado com sucesso!');
+            closarModalPDFIndividual();
+        } catch (erro) {
+            console.error('Erro ao gerar PDF:', erro);
+            alert('❌ Erro ao gerar PDF: ' + erro.message);
+        }
     }
     
     function getFuncNome(id) { const func = dados.funcionarios.find(f => f.id == id); return func ? func.nome : 'Desconhecido'; }
