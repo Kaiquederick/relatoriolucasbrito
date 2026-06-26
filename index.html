@@ -1494,11 +1494,15 @@
         <h2 style="font-size: 16px; font-weight: 600; color: #666; margin: -12px 0 16px 0; letter-spacing: 0.5px;">LUCAS BRITO</h2>
         <p>Sistema de Gestão de Pagamentos</p>
         <div class="form-group">
+            <label>Usuário</label>
+            <input type="text" id="usernameInput" placeholder="Digite seu usuário" onkeypress="if(event.key==='Enter') document.getElementById('passwordInput').focus()">
+        </div>
+        <div class="form-group">
             <label>Senha de Acesso</label>
             <input type="password" id="passwordInput" placeholder="Digite sua senha" onkeypress="if(event.key==='Enter') login()">
         </div>
         <div id="loginError" class="login-error" style="display: none;">
-            ❌ Senha incorreta! Tente novamente.<br>
+            ❌ Usuário ou senha incorretos! Tente novamente.<br>
             <small style="opacity: 0.8; margin-top: 6px; display: block;">Dica: Verifique se Caps Lock está desativado</small>
         </div>
         <button class="btn" onclick="login()">Entrar</button>
@@ -1746,90 +1750,33 @@
 
 <script>
     // ═══════════════════════════════════════════════════════════════
-    //  CONFIGURAÇÃO DE SINCRONIZAÇÃO (JSONBin)
-    //  👉 Você só precisa preencher 1 valor: a sua MASTER KEY
-    //  Veja o tutorial COMO_ATIVAR.md para pegar essa chave (1 minuto)
+    //  CONFIGURAÇÃO DE SINCRONIZAÇÃO (JSONBlob - SEM CADASTRO)
+    //  👉 Preencha só 1 valor: o ID do seu "blob" (veja COMO_ATIVAR.md)
     // ═══════════════════════════════════════════════════════════════
-    const JSONBIN_MASTER_KEY = "$2a$10$UT.BjVBTQ.qEYMovwAuCVelGXAFDxc6R1neTpWHuSiIiyt/bXpyoa";
-    // Não mexa nessa linha. Ela é o "endereço" fixo dos seus dados:
-    const JSONBIN_BIN_NAME = "allin_eventos_lucas_brito";
+    const JSONBLOB_ID = "019f0606-3fb1-72ff-9c1f-826c8c8da639";
     // ═══════════════════════════════════════════════════════════════
 
     let database = null; // mantido por compatibilidade (não usado)
-    let binId = localStorage.getItem('jsonbin_bin_id') || null;
-    let sincronizacaoAtiva = !JSONBIN_MASTER_KEY.includes('COLE_');
+    let blobId = (!JSONBLOB_ID.includes('COLE_')) ? JSONBLOB_ID : null;
+    let sincronizacaoAtiva = blobId !== null;
     let salvandoNaNuvem = false;
 
-    // Cabeçalhos padrão para a API
-    function headersJSONBin(extra = {}) {
-        return Object.assign({
-            'Content-Type': 'application/json',
-            'X-Master-Key': JSONBIN_MASTER_KEY
-        }, extra);
-    }
-
-    // Garante que existe um "bin" (registro) para guardar os dados.
-    // Procura por um bin com o nome fixo; se não achar, cria um novo.
-    async function garantirBin() {
-        if (binId) return binId;
-
-        // Tenta achar um bin já existente pelo nome (via collection padrão)
-        try {
-            const resp = await fetch('https://api.jsonbin.io/v3/c/uncategorized/bins', {
-                method: 'GET',
-                headers: headersJSONBin()
-            });
-            if (resp.ok) {
-                const lista = await resp.json();
-                const existente = Array.isArray(lista)
-                    ? lista.find(b => b.snippetMeta && b.snippetMeta.name === JSONBIN_BIN_NAME)
-                    : null;
-                if (existente && existente.record) {
-                    binId = existente.record;
-                    localStorage.setItem('jsonbin_bin_id', binId);
-                    return binId;
-                }
-            }
-        } catch (e) {
-            console.log('Não foi possível listar bins, vou criar um novo.');
-        }
-
-        // Cria um bin novo com os dados atuais
-        try {
-            const resp = await fetch('https://api.jsonbin.io/v3/b', {
-                method: 'POST',
-                headers: headersJSONBin({
-                    'X-Bin-Name': JSONBIN_BIN_NAME,
-                    'X-Bin-Private': 'true'
-                }),
-                body: JSON.stringify(dados)
-            });
-            if (resp.ok) {
-                const json = await resp.json();
-                binId = json.metadata.id;
-                localStorage.setItem('jsonbin_bin_id', binId);
-                console.log('✅ Banco de dados criado:', binId);
-                return binId;
-            }
-        } catch (e) {
-            console.error('Erro ao criar bin:', e);
-        }
-        return null;
+    function urlJSONBlob() {
+        return `https://jsonblob.com/api/jsonBlob/${blobId}`;
     }
 
     // Lê os dados da nuvem
     async function lerNuvem() {
         if (!sincronizacaoAtiva) return null;
-        const id = await garantirBin();
-        if (!id) return null;
         try {
-            const resp = await fetch(`https://api.jsonbin.io/v3/b/${id}/latest`, {
+            const resp = await fetch(urlJSONBlob(), {
                 method: 'GET',
-                headers: headersJSONBin()
+                headers: { 'Accept': 'application/json' }
             });
             if (resp.ok) {
-                const json = await resp.json();
-                return json.record;
+                return await resp.json();
+            } else {
+                console.log('Resposta da nuvem:', resp.status);
             }
         } catch (e) {
             console.log('Sem conexão com a nuvem no momento.');
@@ -1840,13 +1787,14 @@
     // Salva os dados na nuvem
     async function salvarNuvem() {
         if (!sincronizacaoAtiva || salvandoNaNuvem) return;
-        const id = await garantirBin();
-        if (!id) return;
         salvandoNaNuvem = true;
         try {
-            await fetch(`https://api.jsonbin.io/v3/b/${id}`, {
+            await fetch(urlJSONBlob(), {
                 method: 'PUT',
-                headers: headersJSONBin(),
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Accept': 'application/json'
+                },
                 body: JSON.stringify(dados)
             });
             console.log('✅ Salvo na nuvem!');
@@ -1857,16 +1805,7 @@
         }
     }
 
-    // Mostra um aviso discreto SÓ se a sincronização não estiver configurada
-    window.addEventListener('DOMContentLoaded', function() {
-        if (!sincronizacaoAtiva) {
-            const aviso = document.createElement('div');
-            aviso.style.cssText = 'position:fixed;bottom:0;left:0;right:0;background:#f39c12;color:white;padding:10px;text-align:center;font-size:12px;font-weight:600;z-index:99999;';
-            aviso.innerHTML = '⚙️ Falta 1 passo para sincronizar entre celular e computador. Veja COMO_ATIVAR.';
-            document.body.appendChild(aviso);
-        }
-    });
-
+    const USUARIO = 'Allin';
     const SENHA = 'Pedro2606';
     let dados = { 
         funcionarios: [
@@ -1948,10 +1887,11 @@
     }
 
     function login() {
+        const usuario = document.getElementById('usernameInput').value.trim();
         const senha = document.getElementById('passwordInput').value.trim();
         const errorDiv = document.getElementById('loginError');
         
-        if (senha === SENHA) {
+        if (usuario === USUARIO && senha === SENHA) {
             errorDiv.style.display = 'none';
             localStorage.setItem('logado', 'true');
             localStorage.setItem('dataLogin', new Date().getTime());
@@ -1962,10 +1902,8 @@
             iniciarSincronizacaoAutomatica(); // ✅ Iniciar sincronização automática
         } else {
             errorDiv.style.display = 'block';
-            console.log('Senha digitada:', senha);
-            console.log('Senha correta:', SENHA);
             document.getElementById('passwordInput').value = '';
-            document.getElementById('passwordInput').focus();
+            document.getElementById('usernameInput').focus();
         }
     }
 
