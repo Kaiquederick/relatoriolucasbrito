@@ -1744,36 +1744,128 @@
     </div>
 </div>
 
-<script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-app.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-database.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-app.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-database.js"></script>
 <script>
-    // Firebase Configuration
-    const firebaseConfig = {
-        apiKey: "AIzaSyBFrP_cL5X9xK8mN0pQ9rS1tU2vW3xYzAb",
-        authDomain: "meus-relatorios-lucas.firebaseapp.com",
-        databaseURL: "https://meus-relatorios-lucas-default-rtdb.firebaseio.com",
-        projectId: "meus-relatorios-lucas",
-        storageBucket: "meus-relatorios-lucas.appspot.com",
-        messagingSenderId: "123456789012",
-        appId: "1:123456789012:web:abcdef1234567890"
-    };
+    // ═══════════════════════════════════════════════════════════════
+    //  CONFIGURAÇÃO DE SINCRONIZAÇÃO (JSONBin)
+    //  👉 Você só precisa preencher 1 valor: a sua MASTER KEY
+    //  Veja o tutorial COMO_ATIVAR.md para pegar essa chave (1 minuto)
+    // ═══════════════════════════════════════════════════════════════
+    const JSONBIN_MASTER_KEY = "$2a$10$UT.BjVBTQ.qEYMovwAuCVelGXAFDxc6R1neTpWHuSiIiyt/bXpyoa";
+    // Não mexa nessa linha. Ela é o "endereço" fixo dos seus dados:
+    const JSONBIN_BIN_NAME = "allin_eventos_lucas_brito";
+    // ═══════════════════════════════════════════════════════════════
 
-    // Initialize Firebase
-    let database = null;
-    // ✅ FIX: Usar ID FIXO para sincronizar entre dispositivos (celular + computador)
-    let usuarioId = 'allin_eventos_lucas_brito';
-    localStorage.setItem('usuarioId', usuarioId);
+    let database = null; // mantido por compatibilidade (não usado)
+    let binId = localStorage.getItem('jsonbin_bin_id') || null;
+    let sincronizacaoAtiva = !JSONBIN_MASTER_KEY.includes('COLE_');
+    let salvandoNaNuvem = false;
 
-    try {
-        firebase.initializeApp(firebaseConfig);
-        database = firebase.database();
-        console.log('✅ Firebase inicializado com sucesso!');
-    } catch (erro) {
-        console.warn('⚠️ Firebase não disponível, usando apenas localStorage');
-        database = null;
+    // Cabeçalhos padrão para a API
+    function headersJSONBin(extra = {}) {
+        return Object.assign({
+            'Content-Type': 'application/json',
+            'X-Master-Key': JSONBIN_MASTER_KEY
+        }, extra);
     }
+
+    // Garante que existe um "bin" (registro) para guardar os dados.
+    // Procura por um bin com o nome fixo; se não achar, cria um novo.
+    async function garantirBin() {
+        if (binId) return binId;
+
+        // Tenta achar um bin já existente pelo nome (via collection padrão)
+        try {
+            const resp = await fetch('https://api.jsonbin.io/v3/c/uncategorized/bins', {
+                method: 'GET',
+                headers: headersJSONBin()
+            });
+            if (resp.ok) {
+                const lista = await resp.json();
+                const existente = Array.isArray(lista)
+                    ? lista.find(b => b.snippetMeta && b.snippetMeta.name === JSONBIN_BIN_NAME)
+                    : null;
+                if (existente && existente.record) {
+                    binId = existente.record;
+                    localStorage.setItem('jsonbin_bin_id', binId);
+                    return binId;
+                }
+            }
+        } catch (e) {
+            console.log('Não foi possível listar bins, vou criar um novo.');
+        }
+
+        // Cria um bin novo com os dados atuais
+        try {
+            const resp = await fetch('https://api.jsonbin.io/v3/b', {
+                method: 'POST',
+                headers: headersJSONBin({
+                    'X-Bin-Name': JSONBIN_BIN_NAME,
+                    'X-Bin-Private': 'true'
+                }),
+                body: JSON.stringify(dados)
+            });
+            if (resp.ok) {
+                const json = await resp.json();
+                binId = json.metadata.id;
+                localStorage.setItem('jsonbin_bin_id', binId);
+                console.log('✅ Banco de dados criado:', binId);
+                return binId;
+            }
+        } catch (e) {
+            console.error('Erro ao criar bin:', e);
+        }
+        return null;
+    }
+
+    // Lê os dados da nuvem
+    async function lerNuvem() {
+        if (!sincronizacaoAtiva) return null;
+        const id = await garantirBin();
+        if (!id) return null;
+        try {
+            const resp = await fetch(`https://api.jsonbin.io/v3/b/${id}/latest`, {
+                method: 'GET',
+                headers: headersJSONBin()
+            });
+            if (resp.ok) {
+                const json = await resp.json();
+                return json.record;
+            }
+        } catch (e) {
+            console.log('Sem conexão com a nuvem no momento.');
+        }
+        return null;
+    }
+
+    // Salva os dados na nuvem
+    async function salvarNuvem() {
+        if (!sincronizacaoAtiva || salvandoNaNuvem) return;
+        const id = await garantirBin();
+        if (!id) return;
+        salvandoNaNuvem = true;
+        try {
+            await fetch(`https://api.jsonbin.io/v3/b/${id}`, {
+                method: 'PUT',
+                headers: headersJSONBin(),
+                body: JSON.stringify(dados)
+            });
+            console.log('✅ Salvo na nuvem!');
+        } catch (e) {
+            console.log('⚠️ Não consegui salvar na nuvem agora.');
+        } finally {
+            salvandoNaNuvem = false;
+        }
+    }
+
+    // Mostra um aviso discreto SÓ se a sincronização não estiver configurada
+    window.addEventListener('DOMContentLoaded', function() {
+        if (!sincronizacaoAtiva) {
+            const aviso = document.createElement('div');
+            aviso.style.cssText = 'position:fixed;bottom:0;left:0;right:0;background:#f39c12;color:white;padding:10px;text-align:center;font-size:12px;font-weight:600;z-index:99999;';
+            aviso.innerHTML = '⚙️ Falta 1 passo para sincronizar entre celular e computador. Veja COMO_ATIVAR.';
+            document.body.appendChild(aviso);
+        }
+    });
 
     const SENHA = 'Pedro2606';
     let dados = { 
@@ -1804,50 +1896,45 @@
             if (!dados.trabalhos) dados.trabalhos = [];
         }
         
-        // ✅ SINCRONIZAR COM FIREBASE IMEDIATAMENTE
-        if (database) {
-            database.ref('usuarios/' + usuarioId + '/dados').once('value').then(snapshot => {
-                if (snapshot.exists()) {
-                    dados = snapshot.val();
+        // ✅ BUSCAR DA NUVEM IMEDIATAMENTE
+        if (sincronizacaoAtiva) {
+            lerNuvem().then(dadosNuvem => {
+                if (dadosNuvem && dadosNuvem.funcionarios) {
+                    dados = dadosNuvem;
                     if (!dados.despesas) dados.despesas = [];
                     if (!dados.trabalhos) dados.trabalhos = [];
                     localStorage.setItem('dados_relatorios', JSON.stringify(dados));
                     atualizarTelas();
-                    console.log('✅ Dados sincronizados!');
+                    console.log('✅ Dados carregados da nuvem!');
                 }
-            }).catch(erro => {
-                console.log('ℹ️ Usando dados locais');
             });
         }
     }
 
     function salvarDados() {
         localStorage.setItem('dados_relatorios', JSON.stringify(dados));
-        
-        // ✅ SALVAR IMEDIATAMENTE NO FIREBASE
-        if (database) {
-            database.ref('usuarios/' + usuarioId + '/dados').set(dados).then(() => {
-                console.log('✅ Sincronizado!');
-            }).catch(erro => {
-                console.log('⚠️ Erro ao sincronizar');
-            });
-        }
-        
         atualizarTelas();
+        
+        // ✅ SALVAR NA NUVEM
+        if (sincronizacaoAtiva) {
+            salvarNuvem();
+        }
     }
 
-    // ✅ SINCRONIZAÇÃO AUTOMÁTICA A CADA 2 SEGUNDOS (Sem mostrar nada para o usuário)
+    // ✅ SINCRONIZAÇÃO AUTOMÁTICA A CADA 4 SEGUNDOS
+    let intervaloSync = null;
     function iniciarSincronizacaoAutomatica() {
-        setInterval(() => {
-            if (database && localStorage.getItem('logado') === 'true') {
-                database.ref('usuarios/' + usuarioId + '/dados').once('value').then(snapshot => {
-                    if (snapshot.exists()) {
-                        const dadosNuvem = snapshot.val();
+        if (intervaloSync) return; // Evitar duplicar
+        if (!sincronizacaoAtiva) return;
+        
+        intervaloSync = setInterval(() => {
+            if (localStorage.getItem('logado') === 'true' && !salvandoNaNuvem) {
+                lerNuvem().then(dadosNuvem => {
+                    if (dadosNuvem && dadosNuvem.funcionarios) {
                         const dadosLocal = JSON.parse(localStorage.getItem('dados_relatorios') || '{}');
-                        
-                        // Se dados são diferentes, sincronizar
+                        // Se a nuvem tem algo diferente, atualizar a tela
                         if (JSON.stringify(dadosLocal) !== JSON.stringify(dadosNuvem)) {
-                            console.log('🔄 Sincronizando dados...');
+                            console.log('🔄 Atualizando da nuvem...');
                             dados = dadosNuvem;
                             if (!dados.despesas) dados.despesas = [];
                             if (!dados.trabalhos) dados.trabalhos = [];
@@ -1855,11 +1942,9 @@
                             atualizarTelas();
                         }
                     }
-                }).catch(erro => {
-                    // Silenciosamente ignorar erros
                 });
             }
-        }, 2000);
+        }, 4000); // A cada 4 segundos
     }
 
     function login() {
