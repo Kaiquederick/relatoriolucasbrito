@@ -1537,12 +1537,7 @@
                 <p>Lucas Brito</p>
             </div>
         </div>
-        <div style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap; margin-right: 10px;">
-            <button class="logout-btn" style="background: #27ae60; font-size: 12px;" onclick="sincronizarAgora()" title="Sincronizar dados entre dispositivos">🔄 Sincronizar</button>
-            <button class="logout-btn" style="background: #3498db; font-size: 12px;" onclick="exportarDados()" title="Baixar backup dos dados">💾 Exportar</button>
-            <button class="logout-btn" style="background: #9b59b6; font-size: 12px;" onclick="importarDados()" title="Restaurar dados de um backup">📂 Importar</button>
-            <button class="logout-btn" onclick="logout()">Sair</button>
-        </div>
+        <button class="logout-btn" onclick="logout()">Sair</button>
     </div>
 
     <div class="tabs">
@@ -1809,22 +1804,19 @@
             if (!dados.trabalhos) dados.trabalhos = [];
         }
         
-        // ✅ SINCRONIZAR COM FIREBASE (todos os dispositivos usam o mesmo usuarioId agora)
+        // ✅ SINCRONIZAR COM FIREBASE IMEDIATAMENTE
         if (database) {
             database.ref('usuarios/' + usuarioId + '/dados').once('value').then(snapshot => {
                 if (snapshot.exists()) {
-                    console.log('🔄 Sincronizando dados da nuvem...');
                     dados = snapshot.val();
+                    if (!dados.despesas) dados.despesas = [];
+                    if (!dados.trabalhos) dados.trabalhos = [];
                     localStorage.setItem('dados_relatorios', JSON.stringify(dados));
                     atualizarTelas();
-                    console.log('✅ Dados sincronizados da nuvem (versão mais recente)!');
-                    // Mostrar notificação visual
-                    if (document.getElementById('dashboard') && !document.getElementById('dashboard').classList.contains('hidden')) {
-                        showNotificacao('✅ Dados sincronizados com sucesso!');
-                    }
+                    console.log('✅ Dados sincronizados!');
                 }
             }).catch(erro => {
-                console.log('ℹ️ Usando dados locais (sem internet)');
+                console.log('ℹ️ Usando dados locais');
             });
         }
     }
@@ -1832,16 +1824,42 @@
     function salvarDados() {
         localStorage.setItem('dados_relatorios', JSON.stringify(dados));
         
-        // Sincronizar com Firebase se disponível
+        // ✅ SALVAR IMEDIATAMENTE NO FIREBASE
         if (database) {
             database.ref('usuarios/' + usuarioId + '/dados').set(dados).then(() => {
-                console.log('✅ Dados salvos na nuvem!');
+                console.log('✅ Sincronizado!');
             }).catch(erro => {
-                console.log('⚠️ Erro ao salvar na nuvem, dados salvos localmente');
+                console.log('⚠️ Erro ao sincronizar');
             });
         }
         
         atualizarTelas();
+    }
+
+    // ✅ SINCRONIZAÇÃO AUTOMÁTICA A CADA 2 SEGUNDOS (Sem mostrar nada para o usuário)
+    function iniciarSincronizacaoAutomatica() {
+        setInterval(() => {
+            if (database && localStorage.getItem('logado') === 'true') {
+                database.ref('usuarios/' + usuarioId + '/dados').once('value').then(snapshot => {
+                    if (snapshot.exists()) {
+                        const dadosNuvem = snapshot.val();
+                        const dadosLocal = JSON.parse(localStorage.getItem('dados_relatorios') || '{}');
+                        
+                        // Se dados são diferentes, sincronizar
+                        if (JSON.stringify(dadosLocal) !== JSON.stringify(dadosNuvem)) {
+                            console.log('🔄 Sincronizando dados...');
+                            dados = dadosNuvem;
+                            if (!dados.despesas) dados.despesas = [];
+                            if (!dados.trabalhos) dados.trabalhos = [];
+                            localStorage.setItem('dados_relatorios', JSON.stringify(dados));
+                            atualizarTelas();
+                        }
+                    }
+                }).catch(erro => {
+                    // Silenciosamente ignorar erros
+                });
+            }
+        }, 2000);
     }
 
     function login() {
@@ -1856,6 +1874,7 @@
             document.getElementById('dashboard').classList.remove('hidden');
             carregarDados();
             atualizarTelas();
+            iniciarSincronizacaoAutomatica(); // ✅ Iniciar sincronização automática
         } else {
             errorDiv.style.display = 'block';
             console.log('Senha digitada:', senha);
@@ -1883,6 +1902,7 @@
             document.getElementById('dashboard').classList.remove('hidden');
             carregarDados();
             atualizarTelas();
+            iniciarSincronizacaoAutomatica(); // ✅ Iniciar sincronização automática
             
             // Restaurar aba ativa
             const abaAtiva = localStorage.getItem('abaAtiva') || 'funcionarios';
@@ -1930,112 +1950,9 @@
         salvarDados();
     }
 
-    // ✅ NOVO: Exportar dados para sincronizar entre dispositivos
-    function exportarDados() {
-        const dataStr = JSON.stringify(dados, null, 2);
-        const dataBlob = new Blob([dataStr], { type: 'application/json' });
-        const url = URL.createObjectURL(dataBlob);
-        const link = document.createElement('a');
-        link.href = url;
-        link.download = `backup_relatorios_${new Date().toISOString().split('T')[0]}.json`;
-        link.click();
-        alert('✅ Dados exportados com sucesso! Arquivo baixado.');
-    }
+    // Sincronização automática agora funciona em background sem ação do usuário
 
-    // ✅ NOVO: Importar dados de outro dispositivo
-    function importarDados() {
-        const input = document.createElement('input');
-        input.type = 'file';
-        input.accept = '.json';
-        input.onchange = (e) => {
-            const file = e.target.files[0];
-            if (!file) return;
-            
-            const reader = new FileReader();
-            reader.onload = (evento) => {
-                try {
-                    const dadosImportados = JSON.parse(evento.target.result);
-                    
-                    // Validar estrutura
-                    if (!dadosImportados.funcionarios || !dadosImportados.pagamentos) {
-                        alert('❌ Arquivo inválido! Estrutura de dados incorreta.');
-                        return;
-                    }
-                    
-                    // Confirmar importação
-                    if (confirm(`✅ Prestes a importar dados:\n- ${dadosImportados.funcionarios.length} funcionários\n- ${dadosImportados.pagamentos.length} pagamentos\n- ${dadosImportados.despesas?.length || 0} despesas\n\nOs dados atuais serão SOBRESCRITO. Continuar?`)) {
-                        dados = dadosImportados;
-                        salvarDados();
-                        atualizarTelas();
-                        alert('✅ Dados importados e sincronizados com sucesso!');
-                    }
-                } catch (erro) {
-                    alert('❌ Erro ao ler arquivo: ' + erro.message);
-                }
-            };
-            reader.readAsText(file);
-        };
-        input.click();
-    }
-
-    // ✅ NOVO: Sincronizar agora (forçar sincronização do Firebase)
-    function sincronizarAgora() {
-        if (!database) {
-            alert('❌ Firebase não disponível neste navegador.');
-            return;
-        }
-        
-        const btnSync = event.target;
-        btnSync.disabled = true;
-        btnSync.textContent = '⏳ Sincronizando...';
-        
-        setTimeout(() => {
-            salvarDados();
-            carregarDados();
-            alert('✅ Dados sincronizados com sucesso! Ambos os dispositivos estão atualizados.');
-            btnSync.disabled = false;
-            btnSync.textContent = '🔄 Sincronizar';
-        }, 1500);
-    }
-
-    // ✅ NOVO: Mostrar notificação temporária
-    function showNotificacao(mensagem) {
-        const notif = document.createElement('div');
-        notif.style.cssText = `
-            position: fixed;
-            top: 80px;
-            right: 20px;
-            background: #27ae60;
-            color: white;
-            padding: 12px 20px;
-            border-radius: 8px;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.2);
-            z-index: 10000;
-            font-size: 14px;
-            animation: slideIn 0.3s ease;
-        `;
-        notif.textContent = mensagem;
-        document.body.appendChild(notif);
-        
-        setTimeout(() => {
-            notif.style.animation = 'slideOut 0.3s ease';
-            setTimeout(() => notif.remove(), 300);
-        }, 3000);
-    }
-
-    // Estilos para animação de notificação
-    const style = document.createElement('style');
-    style.textContent = `
-        @keyframes slideIn {
-            from { transform: translateX(400px); opacity: 0; }
-            to { transform: translateX(0); opacity: 1; }
-        }
-        @keyframes slideOut {
-            from { transform: translateX(0); opacity: 1; }
-            to { transform: translateX(400px); opacity: 0; }
-        }
-    `;
-    document.head.appendChild(style);
+    
 
     function openModalPag() {
         const hoje = new Date().toISOString().split('T')[0];
