@@ -188,7 +188,7 @@
 
         .navbar {
             background: white;
-            padding: 24px 48px;
+            padding: 16px 24px;
             display: flex;
             justify-content: space-between;
             align-items: center;
@@ -197,24 +197,29 @@
             top: 0;
             z-index: 100;
             border-bottom: 1px solid var(--border);
+            flex-wrap: wrap;
+            gap: 12px;
         }
 
         .navbar-left {
             display: flex;
             align-items: center;
-            gap: 24px;
+            gap: 16px;
+            min-width: 0;
+            flex: 1;
         }
 
         .navbar-logo {
-            width: 60px;
-            height: 60px;
+            width: 50px;
+            height: 50px;
             background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
-            border-radius: 14px;
+            border-radius: 12px;
             display: flex;
             align-items: center;
             justify-content: center;
             box-shadow: 0 8px 20px rgba(0, 123, 255, 0.3);
-            padding: 10px;
+            padding: 8px;
+            flex-shrink: 0;
         }
 
         .navbar-logo img {
@@ -224,32 +229,44 @@
         }
 
         .navbar-text h1 {
-            font-size: 22px;
+            font-size: 18px;
             color: var(--text-primary);
             margin: 0;
             font-weight: 800;
             letter-spacing: -0.3px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
         }
 
         .navbar-text p {
-            font-size: 12px;
+            font-size: 11px;
             color: var(--text-secondary);
-            margin: 4px 0 0 0;
+            margin: 2px 0 0 0;
             font-weight: 600;
+            white-space: nowrap;
+        }
+
+        .navbar-right {
+            display: flex;
+            gap: 10px;
+            flex-shrink: 0;
         }
 
         .logout-btn {
-            padding: 12px 24px;
+            padding: 10px 18px;
             background: linear-gradient(135deg, var(--danger) 0%, #c0392b 100%);
             color: white;
             border: none;
-            border-radius: 10px;
+            border-radius: 8px;
             cursor: pointer;
-            font-size: 13px;
+            font-size: 12px;
             font-weight: 700;
             transition: all 0.3s ease;
             text-transform: uppercase;
             letter-spacing: 0.6px;
+            white-space: nowrap;
+            flex-shrink: 0;
         }
 
         .logout-btn:hover {
@@ -260,24 +277,29 @@
         .tabs {
             display: flex;
             background: white;
-            padding: 0 48px;
-            gap: 8px;
+            padding: 0 16px;
+            gap: 4px;
             border-bottom: 1px solid var(--border);
             overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+            min-height: 60px;
         }
 
         .tab {
-            padding: 18px 32px;
+            padding: 14px 16px;
             cursor: pointer;
             border: none;
             background: none;
-            font-size: 14px;
+            font-size: 12px;
             font-weight: 700;
             color: var(--text-secondary);
             border-bottom: 3px solid transparent;
             transition: all 0.3s ease;
             text-transform: uppercase;
             letter-spacing: 0.5px;
+            white-space: nowrap;
+            flex-shrink: 0;
+        }
             white-space: nowrap;
             position: relative;
         }
@@ -294,16 +316,16 @@
         }
 
         .content {
-            padding: 48px;
+            padding: 24px 16px;
             max-width: 1600px;
             margin: 0 auto;
         }
 
         .section-title {
-            font-size: 24px;
+            font-size: 20px;
             font-weight: 800;
             color: var(--text-primary);
-            margin-bottom: 32px;
+            margin-bottom: 20px;
             letter-spacing: -0.5px;
         }
 
