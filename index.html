@@ -1750,22 +1750,16 @@
 
 <script>
     // ═══════════════════════════════════════════════════════════════
-    //  CONFIGURAÇÃO DE SINCRONIZAÇÃO (JSONBlob - SEM CADASTRO)
-    //  👉 Preencha só 1 valor: o ID do seu "blob" (veja COMO_ATIVAR.md)
+    //  SINCRONIZAÇÃO (armazenamento próprio do Claude — sem cadastro)
+    //  Os dados ficam ligados à sua conta do Claude. Abrindo este
+    //  artifact em qualquer aparelho com a mesma conta, os dados
+    //  aparecem automaticamente sincronizados.
     // ═══════════════════════════════════════════════════════════════
-    const JSONBLOB_ID = "019f0606-3fb1-72ff-9c1f-826c8c8da639";
-    // ═══════════════════════════════════════════════════════════════
-
-    let database = null; // mantido por compatibilidade (não usado)
-    let blobId = (!JSONBLOB_ID.includes('COLE_')) ? JSONBLOB_ID : null;
-    let sincronizacaoAtiva = blobId !== null;
+    const CHAVE_STORAGE = 'allin_eventos_dados';
     let salvandoNaNuvem = false;
+    let ultimaVersaoSalva = '';
 
-    function urlJSONBlob() {
-        return `https://jsonblob.com/api/jsonBlob/${blobId}`;
-    }
-
-    // ✅ Indicador visual discreto de status (canto da tela) — ajuda a diagnosticar
+    // ✅ Indicador visual discreto de status (canto da tela)
     function mostrarStatusSync(texto, cor) {
         let el = document.getElementById('statusSyncDebug');
         if (!el) {
@@ -1778,80 +1772,34 @@
         el.textContent = texto;
     }
 
-    // Lê os dados da nuvem
+    // Lê os dados do armazenamento do Claude
     async function lerNuvem() {
-        if (!sincronizacaoAtiva) return null;
         try {
-            const resp = await fetch(urlJSONBlob(), {
-                method: 'GET',
-                headers: { 'Accept': 'application/json' }
-            });
-            if (resp.ok) {
-                const json = await resp.json();
-                mostrarStatusSync('✅ Leitura OK ' + new Date().toLocaleTimeString(), '#27ae60');
-                return json;
-            } else {
-                mostrarStatusSync('❌ Leitura falhou: HTTP ' + resp.status, '#e74c3c');
+            const resultado = await window.storage.get(CHAVE_STORAGE, false);
+            if (resultado && resultado.value) {
+                mostrarStatusSync('✅ Sincronizado ' + new Date().toLocaleTimeString(), '#27ae60');
+                return JSON.parse(resultado.value);
             }
         } catch (e) {
-            mostrarStatusSync('❌ Erro de leitura: ' + e.message, '#e74c3c');
+            // Chave ainda não existe na primeira vez — normal
+            mostrarStatusSync('ℹ️ Nenhum dado salvo ainda', '#3498db');
         }
         return null;
     }
 
-    // Salva os dados na nuvem
+    // Salva os dados no armazenamento do Claude
     async function salvarNuvem() {
-        if (!sincronizacaoAtiva || salvandoNaNuvem) return;
+        if (salvandoNaNuvem) return;
         salvandoNaNuvem = true;
         try {
-            const resp = await fetch(urlJSONBlob(), {
-                method: 'PUT',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Accept': 'application/json'
-                },
-                body: JSON.stringify(dados)
-            });
-            if (resp.ok) {
-                mostrarStatusSync('✅ Salvo na nuvem ' + new Date().toLocaleTimeString(), '#27ae60');
-            } else {
-                mostrarStatusSync('❌ Falha ao salvar: HTTP ' + resp.status, '#e74c3c');
-            }
+            const textoDados = JSON.stringify(dados);
+            await window.storage.set(CHAVE_STORAGE, textoDados, false);
+            ultimaVersaoSalva = textoDados;
+            mostrarStatusSync('✅ Salvo ' + new Date().toLocaleTimeString(), '#27ae60');
         } catch (e) {
             mostrarStatusSync('❌ Erro ao salvar: ' + e.message, '#e74c3c');
         } finally {
             salvandoNaNuvem = false;
-        }
-    }
-
-    // ✅ Teste de conexão ao abrir — escreve e lê de volta pra confirmar que funciona
-    async function testarConexaoSync() {
-        mostrarStatusSync('⏳ Testando conexão...', '#f39c12');
-        try {
-            // 1) Tenta LER
-            const respGet = await fetch(urlJSONBlob(), {
-                method: 'GET',
-                headers: { 'Accept': 'application/json' }
-            });
-            if (!respGet.ok) {
-                mostrarStatusSync('❌ LEITURA falhou: HTTP ' + respGet.status + ' (Blob ID pode estar errado)', '#e74c3c');
-                return;
-            }
-            const dadosLidos = await respGet.json();
-
-            // 2) Tenta SALVAR de volta o que leu (sem alterar nada)
-            const respPut = await fetch(urlJSONBlob(), {
-                method: 'PUT',
-                headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
-                body: JSON.stringify(dadosLidos)
-            });
-            if (respPut.ok) {
-                mostrarStatusSync('✅ Conexão OK! Sincronização funcionando.', '#27ae60');
-            } else {
-                mostrarStatusSync('❌ GRAVAÇÃO falhou: HTTP ' + respPut.status, '#e74c3c');
-            }
-        } catch (e) {
-            mostrarStatusSync('❌ Bloqueado pelo navegador (CORS): ' + e.message, '#e74c3c');
         }
     }
 
@@ -1878,56 +1826,42 @@
     };
 
     function carregarDados() {
-        const salvo = localStorage.getItem('dados_relatorios');
-        if (salvo) {
-            dados = JSON.parse(salvo);
-            if (!dados.despesas) dados.despesas = [];
-            if (!dados.trabalhos) dados.trabalhos = [];
-        }
-        
-        // ✅ BUSCAR DA NUVEM IMEDIATAMENTE
-        if (sincronizacaoAtiva) {
-            lerNuvem().then(dadosNuvem => {
-                if (dadosNuvem && dadosNuvem.funcionarios) {
-                    dados = dadosNuvem;
-                    if (!dados.despesas) dados.despesas = [];
-                    if (!dados.trabalhos) dados.trabalhos = [];
-                    localStorage.setItem('dados_relatorios', JSON.stringify(dados));
-                    atualizarTelas();
-                    console.log('✅ Dados carregados da nuvem!');
-                }
-            });
-        }
+        // ✅ Buscar do armazenamento do Claude
+        lerNuvem().then(dadosNuvem => {
+            if (dadosNuvem && dadosNuvem.funcionarios) {
+                dados = dadosNuvem;
+                if (!dados.despesas) dados.despesas = [];
+                if (!dados.trabalhos) dados.trabalhos = [];
+                ultimaVersaoSalva = JSON.stringify(dados);
+                atualizarTelas();
+            } else {
+                // Primeira vez — salva os dados de exemplo no armazenamento
+                salvarNuvem();
+            }
+        });
     }
 
     function salvarDados() {
-        localStorage.setItem('dados_relatorios', JSON.stringify(dados));
         atualizarTelas();
-        
-        // ✅ SALVAR NA NUVEM
-        if (sincronizacaoAtiva) {
-            salvarNuvem();
-        }
+        salvarNuvem();
     }
 
     // ✅ SINCRONIZAÇÃO AUTOMÁTICA A CADA 4 SEGUNDOS
     let intervaloSync = null;
     function iniciarSincronizacaoAutomatica() {
         if (intervaloSync) return; // Evitar duplicar
-        if (!sincronizacaoAtiva) return;
         
         intervaloSync = setInterval(() => {
-            if (localStorage.getItem('logado') === 'true' && !salvandoNaNuvem) {
+            if (sessaoLogado && !salvandoNaNuvem) {
                 lerNuvem().then(dadosNuvem => {
                     if (dadosNuvem && dadosNuvem.funcionarios) {
-                        const dadosLocal = JSON.parse(localStorage.getItem('dados_relatorios') || '{}');
-                        // Se a nuvem tem algo diferente, atualizar a tela
-                        if (JSON.stringify(dadosLocal) !== JSON.stringify(dadosNuvem)) {
-                            console.log('🔄 Atualizando da nuvem...');
+                        const textoNuvem = JSON.stringify(dadosNuvem);
+                        // Se a nuvem tem algo diferente do que já vimos, atualizar a tela
+                        if (textoNuvem !== ultimaVersaoSalva) {
                             dados = dadosNuvem;
                             if (!dados.despesas) dados.despesas = [];
                             if (!dados.trabalhos) dados.trabalhos = [];
-                            localStorage.setItem('dados_relatorios', JSON.stringify(dados));
+                            ultimaVersaoSalva = textoNuvem;
                             atualizarTelas();
                         }
                     }
@@ -1936,6 +1870,9 @@
         }, 4000); // A cada 4 segundos
     }
 
+    let sessaoLogado = false;
+    let abaAtivaAtual = 'funcionarios';
+
     function login() {
         const usuario = document.getElementById('usernameInput').value.trim();
         const senha = document.getElementById('passwordInput').value.trim();
@@ -1943,14 +1880,12 @@
         
         if (usuario === USUARIO && senha === SENHA) {
             errorDiv.style.display = 'none';
-            localStorage.setItem('logado', 'true');
-            localStorage.setItem('dataLogin', new Date().getTime());
+            sessaoLogado = true;
             document.getElementById('loginScreen').classList.add('hidden');
             document.getElementById('dashboard').classList.remove('hidden');
             carregarDados();
             atualizarTelas();
             iniciarSincronizacaoAutomatica(); // ✅ Iniciar sincronização automática
-            testarConexaoSync(); // ✅ Testar conexão e mostrar resultado na tela
         } else {
             errorDiv.style.display = 'block';
             document.getElementById('passwordInput').value = '';
@@ -1959,9 +1894,8 @@
     }
 
     function logout() {
-        localStorage.setItem('logado', 'false');
-        localStorage.removeItem('dataLogin');
-        localStorage.removeItem('abaAtiva');
+        sessaoLogado = false;
+        abaAtivaAtual = 'funcionarios';
         document.getElementById('loginScreen').classList.remove('hidden');
         document.getElementById('dashboard').classList.add('hidden');
         document.getElementById('passwordInput').value = '';
@@ -1969,31 +1903,18 @@
     }
 
     function verificarSessao() {
-        const estaLogado = localStorage.getItem('logado') === 'true';
-        
-        if (estaLogado) {
+        // Dentro do Claude, cada vez que o artifact abre, pede login novamente (por segurança)
+        if (sessaoLogado) {
             document.getElementById('loginScreen').classList.add('hidden');
             document.getElementById('dashboard').classList.remove('hidden');
             carregarDados();
             atualizarTelas();
-            iniciarSincronizacaoAutomatica(); // ✅ Iniciar sincronização automática
-            
-            // Restaurar aba ativa
-            const abaAtiva = localStorage.getItem('abaAtiva') || 'funcionarios';
-            const tabContent = document.querySelectorAll('.tab-content');
-            const tabs = document.querySelectorAll('.tab');
-            
-            tabContent.forEach(el => el.classList.add('hidden'));
-            tabs.forEach(el => el.classList.remove('active'));
-            
-            document.getElementById('tab-' + abaAtiva).classList.remove('hidden');
-            const tabAtivo = Array.from(tabs).find(tab => tab.textContent.toLowerCase().includes(['funcionarios', 'pagamentos', 'despesas', 'relatório'][['funcionarios', 'pagamentos', 'despesas', 'relatorio'].indexOf(abaAtiva)].replace('á', 'a')));
-            if (tabAtivo) tabAtivo.classList.add('active');
+            iniciarSincronizacaoAutomatica();
         }
     }
 
     function changeTab(tab) {
-        localStorage.setItem('abaAtiva', tab);
+        abaAtivaAtual = tab;
         document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden'));
         document.getElementById('tab-' + tab).classList.remove('hidden');
         document.querySelectorAll('.tab').forEach(el => el.classList.remove('active'));
