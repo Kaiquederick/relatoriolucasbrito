@@ -2216,86 +2216,112 @@
             const pageHeight = doc.internal.pageSize.getHeight();
             let pageNum = 1;
             
+            // Cores corporativas
+            const corPrimaria = [0, 120, 212];
+            const corSecundaria = [51, 51, 51];
+            const corDestaque = [0, 100, 180];
+            const corFundo = [240, 248, 255];
+            
             function adicionarCabecalho(isFirstPage = false) {
-                // Fundo cinza suave no topo
-                doc.setFillColor(245, 247, 250);
-                doc.rect(0, 0, pageWidth, 35, 'F');
+                // Fundo gradiente (simulado com retângulos)
+                doc.setFillColor(0, 120, 212);
+                doc.rect(0, 0, pageWidth, 50, 'F');
                 
-                // Logo da empresa
-                doc.setFontSize(18);
-                doc.setTextColor(25, 118, 210);
+                // Logo estilizado
+                doc.setFontSize(24);
+                doc.setTextColor(255, 255, 255);
                 doc.setFont(undefined, 'bold');
-                doc.text('ALL IN EVENTOS', 20, 12);
+                doc.text('ALLIN', 15, 18);
                 
-                // Divisor
-                doc.setDrawColor(25, 118, 210);
-                doc.setLineWidth(0.5);
-                doc.line(20, 16, pageWidth - 20, 16);
+                // Parte colorida diferente
+                doc.setFontSize(24);
+                doc.setTextColor(255, 255, 255);
+                doc.text('IN', 55, 18);
                 
-                // Informações
-                doc.setFontSize(9);
-                doc.setTextColor(100, 100, 100);
+                doc.setFontSize(11);
+                doc.setTextColor(220, 240, 255);
+                doc.text('EVENTOS', 15, 30);
+                
+                // Linha decorativa
+                doc.setLineWidth(0.8);
+                doc.setDrawColor(255, 255, 255);
+                doc.line(15, 35, pageWidth - 15, 35);
+                
+                // Informação de página
+                doc.setFontSize(8);
+                doc.setTextColor(200, 225, 255);
                 doc.setFont(undefined, 'normal');
-                if (isFirstPage) {
-                    doc.text('Sistema de Gestão de Pagamentos', 20, 25);
-                }
-                doc.text(`Página ${pageNum}`, pageWidth - 30, 25);
+                doc.text(`Página ${pageNum}`, pageWidth - 25, 45);
                 
-                return 40;
+                // Subtítulo
+                if (isFirstPage) {
+                    doc.setFontSize(9);
+                    doc.text('FOLHA DE PAGAMENTO DE FUNCIONÁRIOS', 15, 45);
+                }
+                
+                return 55;
             }
             
             function adicionarRodape() {
-                // Linha divisória
-                doc.setDrawColor(200, 200, 200);
-                doc.setLineWidth(0.3);
-                doc.line(20, pageHeight - 20, pageWidth - 20, pageHeight - 20);
+                // Fundo do rodapé
+                doc.setFillColor(240, 245, 250);
+                doc.rect(0, pageHeight - 18, pageWidth, 18, 'F');
                 
-                // Rodapé
-                doc.setFontSize(8);
-                doc.setTextColor(120, 120, 120);
+                // Linha separadora
+                doc.setDrawColor(0, 120, 212);
+                doc.setLineWidth(0.8);
+                doc.line(0, pageHeight - 18, pageWidth, pageHeight - 18);
+                
+                // Conteúdo do rodapé
+                doc.setFontSize(7.5);
+                doc.setTextColor(100, 120, 140);
                 doc.setFont(undefined, 'normal');
-                doc.text('Documento confidencial - Gerado automaticamente pelo sistema', pageWidth / 2, pageHeight - 12, { align: 'center' });
-                doc.text(new Date().toLocaleDateString('pt-BR') + ' às ' + new Date().toLocaleTimeString('pt-BR'), pageWidth / 2, pageHeight - 8, { align: 'center' });
+                doc.text('© 2024 ALLIN EVENTOS - Gestão de Pagamentos', 15, pageHeight - 13);
+                doc.text(`Documento confiden cial • ${new Date().toLocaleDateString('pt-BR')}`, 15, pageHeight - 9);
+                doc.text(`Sistema Automatizado de Folha de Pagamento`, 15, pageHeight - 5);
             }
             
-            // Primeira página - Cabeçalho
+            // Primeira página
             let y = adicionarCabecalho(true);
-            
-            // Título
-            doc.setFontSize(22);
-            doc.setTextColor(25, 118, 210);
-            doc.setFont(undefined, 'bold');
-            doc.text('FOLHA DE PAGAMENTO', pageWidth / 2, y, { align: 'center' });
-            y += 10;
-            
-            // Período
-            doc.setFontSize(11);
-            doc.setTextColor(80, 80, 80);
-            doc.setFont(undefined, 'normal');
-            doc.text(`Período: ${formatarData(dataInicio)} até ${formatarData(dataFim)}`, pageWidth / 2, y, { align: 'center' });
             y += 8;
             
-            // Separador visual
-            doc.setDrawColor(200, 200, 200);
-            doc.setLineWidth(0.4);
-            doc.line(20, y, pageWidth - 20, y);
-            y += 12;
+            // Caixa de informações do período
+            doc.setFillColor(240, 248, 255);
+            doc.setLineWidth(1);
+            doc.setDrawColor(0, 120, 212);
+            doc.rect(15, y, pageWidth - 30, 16, 'F');
+            doc.rect(15, y, pageWidth - 30, 16);
             
-            // Cabeçalho da tabela
+            doc.setFontSize(10);
+            doc.setTextColor(0, 100, 180);
             doc.setFont(undefined, 'bold');
-            doc.setFontSize(10);
-            doc.setFillColor(25, 118, 210);
-            doc.setTextColor(255, 255, 255);
-            doc.rect(15, y - 7, pageWidth - 30, 9, 'F');
-            doc.text('FUNCIONÁRIO', 20, y);
-            doc.text('CPF', 100, y);
-            doc.text('VALOR (R$)', 155, y, { align: 'right' });
-            doc.setTextColor(0, 0, 0);
-            y += 11;
+            doc.text('PERÍODO DO PAGAMENTO', 20, y + 6);
+            doc.text('TOTAL DE FUNCIONÁRIOS', 130, y + 6);
             
-            // Conteúdo da tabela
+            doc.setFontSize(9);
+            doc.setTextColor(51, 51, 51);
             doc.setFont(undefined, 'normal');
-            doc.setFontSize(10);
+            doc.text(`${formatarData(dataInicio)} até ${formatarData(dataFim)}`, 20, y + 12);
+            doc.text(`${dados.funcionarios.length} registro(s)`, 130, y + 12);
+            
+            y += 26;
+            
+            // Cabeçalho da tabela com design premium
+            doc.setFont(undefined, 'bold');
+            doc.setFontSize(9);
+            doc.setFillColor(0, 100, 180);
+            doc.setTextColor(255, 255, 255);
+            doc.rect(15, y - 6, pageWidth - 30, 10, 'F');
+            
+            doc.text('FUNCIONÁRIO', 20, y + 1);
+            doc.text('CPF', 100, y + 1);
+            doc.text('DATA PAGAMENTO', 130, y + 1);
+            doc.text('VALOR (R$)', pageWidth - 20, y + 1, { align: 'right' });
+            
+            y += 14;
+            doc.setFont(undefined, 'normal');
+            doc.setFontSize(9);
+            
             let totalFolha = 0;
             let linhasAdicionadas = 0;
 
@@ -2309,39 +2335,49 @@
                 if (totalFunc === 0) return;
                 totalFolha += totalFunc;
 
-                // Alternância de cores
+                // Zebrado com cores suaves
                 if (linhasAdicionadas % 2 === 0) {
-                    doc.setFillColor(240, 245, 250);
-                    doc.rect(15, y - 6, pageWidth - 30, 8, 'F');
+                    doc.setFillColor(248, 251, 255);
+                } else {
+                    doc.setFillColor(255, 255, 255);
                 }
+                doc.rect(15, y - 5, pageWidth - 30, 8, 'F');
+                
+                // Borda leve
+                doc.setLineWidth(0.1);
+                doc.setDrawColor(220, 230, 245);
+                doc.rect(15, y - 5, pageWidth - 30, 8);
 
-                doc.setTextColor(30, 30, 30);
-                doc.text(func.nome, 20, y);
+                doc.setTextColor(51, 51, 51);
+                doc.text(func.nome.substring(0, 28), 20, y);
                 doc.text(func.cpf, 100, y);
+                doc.text(formatarData(pagamentosFiltrados[0]?.data || dataInicio), 130, y);
                 doc.text(`R$ ${totalFunc.toFixed(2).replace('.', ',')}`, pageWidth - 20, y, { align: 'right' });
+                
                 y += 8;
                 linhasAdicionadas++;
 
                 // Quebra de página
-                if (y > pageHeight - 40) {
+                if (y > pageHeight - 30) {
                     adicionarRodape();
                     doc.addPage();
                     pageNum++;
-                    y = adicionarCabecalho();
+                    y = adicionarCabecalho() + 8;
                     
-                    // Repetir cabeçalho da tabela
+                    // Repetir cabeçalho
                     doc.setFont(undefined, 'bold');
-                    doc.setFontSize(10);
-                    doc.setFillColor(25, 118, 210);
+                    doc.setFontSize(9);
+                    doc.setFillColor(0, 100, 180);
                     doc.setTextColor(255, 255, 255);
-                    doc.rect(15, y - 7, pageWidth - 30, 9, 'F');
-                    doc.text('FUNCIONÁRIO', 20, y);
-                    doc.text('CPF', 100, y);
-                    doc.text('VALOR (R$)', 155, y, { align: 'right' });
-                    doc.setTextColor(0, 0, 0);
-                    y += 11;
+                    doc.rect(15, y - 6, pageWidth - 30, 10, 'F');
+                    doc.text('FUNCIONÁRIO', 20, y + 1);
+                    doc.text('CPF', 100, y + 1);
+                    doc.text('DATA PAGAMENTO', 130, y + 1);
+                    doc.text('VALOR (R$)', pageWidth - 20, y + 1, { align: 'right' });
+                    doc.setTextColor(51, 51, 51);
+                    y += 14;
                     doc.setFont(undefined, 'normal');
-                    doc.setFontSize(10);
+                    doc.setFontSize(9);
                 }
             });
 
@@ -2350,26 +2386,32 @@
                 return;
             }
 
-            // Linha divisória antes do total
+            // Espaço antes do total
             y += 5;
-            doc.setDrawColor(25, 118, 210);
-            doc.setLineWidth(0.5);
+            
+            // Linha separadora elegante
+            doc.setDrawColor(0, 120, 212);
+            doc.setLineWidth(1);
             doc.line(15, y, pageWidth - 15, y);
             y += 8;
 
-            // Total da folha
+            // Caixa de total com destaque premium
+            doc.setFillColor(200, 230, 255);
+            doc.setLineWidth(1.2);
+            doc.setDrawColor(0, 100, 180);
+            doc.rect(15, y - 7, pageWidth - 30, 12, 'F');
+            doc.rect(15, y - 7, pageWidth - 30, 12);
+
             doc.setFont(undefined, 'bold');
             doc.setFontSize(11);
-            doc.setTextColor(25, 118, 210);
-            doc.setFillColor(240, 248, 255);
-            doc.rect(15, y - 7, pageWidth - 30, 9, 'F');
-            doc.text('TOTAL DA FOLHA:', 20, y);
-            doc.text(`R$ ${totalFolha.toFixed(2).replace('.', ',')}`, pageWidth - 20, y, { align: 'right' });
+            doc.setTextColor(0, 100, 180);
+            doc.text('TOTAL DA FOLHA', 20, y + 2);
+            doc.text(`R$ ${totalFolha.toFixed(2).replace('.', ',')}`, pageWidth - 20, y + 2, { align: 'right' });
 
             // Rodapé final
             adicionarRodape();
             
-            doc.save(`pagamentos-${dataInicio}_ate_${dataFim}.pdf`);
+            doc.save(`ALLIN_PAGAMENTOS_${dataInicio}_ate_${dataFim}.pdf`);
             alert('✅ Relatório de Pagamentos gerado com sucesso!');
         } catch (erro) {
             console.error('Erro ao gerar PDF:', erro);
@@ -2390,155 +2432,197 @@
             const pageHeight = doc.internal.pageSize.getHeight();
             let pageNum = 1;
             
+            // Cores corporativas para despesas
+            const corPrimaria = [220, 53, 69];
+            const corSecundaria = [51, 51, 51];
+            const corDestaque = [180, 30, 50];
+            const corFundo = [255, 245, 248];
+            
             function adicionarCabecalho(isFirstPage = false) {
-                // Fundo cinza suave no topo
-                doc.setFillColor(245, 247, 250);
-                doc.rect(0, 0, pageWidth, 35, 'F');
+                // Fundo em vermelho profissional
+                doc.setFillColor(220, 53, 69);
+                doc.rect(0, 0, pageWidth, 50, 'F');
                 
-                // Logo da empresa
-                doc.setFontSize(18);
-                doc.setTextColor(211, 47, 47);
+                // Logo estilizado
+                doc.setFontSize(24);
+                doc.setTextColor(255, 255, 255);
                 doc.setFont(undefined, 'bold');
-                doc.text('ALL IN EVENTOS', 20, 12);
+                doc.text('ALLIN', 15, 18);
                 
-                // Divisor
-                doc.setDrawColor(211, 47, 47);
-                doc.setLineWidth(0.5);
-                doc.line(20, 16, pageWidth - 20, 16);
+                // Parte colorida diferente
+                doc.setFontSize(24);
+                doc.setTextColor(255, 255, 255);
+                doc.text('IN', 55, 18);
                 
-                // Informações
-                doc.setFontSize(9);
-                doc.setTextColor(100, 100, 100);
+                doc.setFontSize(11);
+                doc.setTextColor(255, 200, 210);
+                doc.text('EVENTOS', 15, 30);
+                
+                // Linha decorativa
+                doc.setLineWidth(0.8);
+                doc.setDrawColor(255, 255, 255);
+                doc.line(15, 35, pageWidth - 15, 35);
+                
+                // Informação de página
+                doc.setFontSize(8);
+                doc.setTextColor(255, 180, 200);
                 doc.setFont(undefined, 'normal');
-                if (isFirstPage) {
-                    doc.text('Sistema de Gestão de Despesas', 20, 25);
-                }
-                doc.text(`Página ${pageNum}`, pageWidth - 30, 25);
+                doc.text(`Página ${pageNum}`, pageWidth - 25, 45);
                 
-                return 40;
+                // Subtítulo
+                if (isFirstPage) {
+                    doc.setFontSize(9);
+                    doc.text('RELATÓRIO DE DESPESAS E CUSTOS', 15, 45);
+                }
+                
+                return 55;
             }
             
             function adicionarRodape() {
-                // Linha divisória
-                doc.setDrawColor(200, 200, 200);
-                doc.setLineWidth(0.3);
-                doc.line(20, pageHeight - 20, pageWidth - 20, pageHeight - 20);
+                // Fundo do rodapé
+                doc.setFillColor(255, 245, 248);
+                doc.rect(0, pageHeight - 18, pageWidth, 18, 'F');
                 
-                // Rodapé
-                doc.setFontSize(8);
-                doc.setTextColor(120, 120, 120);
+                // Linha separadora
+                doc.setDrawColor(220, 53, 69);
+                doc.setLineWidth(0.8);
+                doc.line(0, pageHeight - 18, pageWidth, pageHeight - 18);
+                
+                // Conteúdo do rodapé
+                doc.setFontSize(7.5);
+                doc.setTextColor(100, 80, 100);
                 doc.setFont(undefined, 'normal');
-                doc.text('Documento confidencial - Gerado automaticamente pelo sistema', pageWidth / 2, pageHeight - 12, { align: 'center' });
-                doc.text(new Date().toLocaleDateString('pt-BR') + ' às ' + new Date().toLocaleTimeString('pt-BR'), pageWidth / 2, pageHeight - 8, { align: 'center' });
+                doc.text('© 2024 ALLIN EVENTOS - Gestão Financeira', 15, pageHeight - 13);
+                doc.text(`Documento confidencial • ${new Date().toLocaleDateString('pt-BR')}`, 15, pageHeight - 9);
+                doc.text(`Sistema Automatizado de Controle de Despesas`, 15, pageHeight - 5);
             }
             
-            // Primeira página - Cabeçalho
+            // Primeira página
             let y = adicionarCabecalho(true);
-            
-            // Título
-            doc.setFontSize(22);
-            doc.setTextColor(211, 47, 47);
-            doc.setFont(undefined, 'bold');
-            doc.text('RELATÓRIO DE DESPESAS', pageWidth / 2, y, { align: 'center' });
-            y += 10;
-            
-            // Período
-            doc.setFontSize(11);
-            doc.setTextColor(80, 80, 80);
-            doc.setFont(undefined, 'normal');
-            doc.text(`Período: ${formatarData(dataInicio)} até ${formatarData(dataFim)}`, pageWidth / 2, y, { align: 'center' });
             y += 8;
             
-            // Separador visual
-            doc.setDrawColor(200, 200, 200);
-            doc.setLineWidth(0.4);
-            doc.line(20, y, pageWidth - 20, y);
-            y += 12;
+            // Caixa de informações do período
+            doc.setFillColor(255, 245, 248);
+            doc.setLineWidth(1);
+            doc.setDrawColor(220, 53, 69);
+            doc.rect(15, y, pageWidth - 30, 16, 'F');
+            doc.rect(15, y, pageWidth - 30, 16);
             
-            // Cabeçalho da tabela
+            doc.setFontSize(10);
+            doc.setTextColor(180, 30, 50);
             doc.setFont(undefined, 'bold');
-            doc.setFontSize(10);
-            doc.setFillColor(211, 47, 47);
-            doc.setTextColor(255, 255, 255);
-            doc.rect(15, y - 7, pageWidth - 30, 9, 'F');
-            doc.text('DESCRIÇÃO', 20, y);
-            doc.text('DATA', 130, y);
-            doc.text('VALOR (R$)', 155, y, { align: 'right' });
-            doc.setTextColor(0, 0, 0);
-            y += 11;
+            doc.text('PERÍODO DE DESPESAS', 20, y + 6);
+            doc.text('TOTAL DE REGISTROS', 130, y + 6);
             
-            // Conteúdo da tabela
-            const despesasFiltradas = dados.despesas.filter(d => d.data >= dataInicio && d.data <= dataFim);
-            let totalDespesas = 0;
-            let linhasAdicionadas = 0;
-
+            doc.setFontSize(9);
+            doc.setTextColor(51, 51, 51);
             doc.setFont(undefined, 'normal');
-            doc.setFontSize(10);
-
+            doc.text(`${formatarData(dataInicio)} até ${formatarData(dataFim)}`, 20, y + 12);
+            
+            const despesasFiltradas = dados.despesas.filter(d => d.data >= dataInicio && d.data <= dataFim);
+            doc.text(`${despesasFiltradas.length} despesa(s)`, 130, y + 12);
+            
+            y += 26;
+            
             if (despesasFiltradas.length === 0) {
                 alert('⚠️ Nenhuma despesa encontrada neste período!');
                 return;
             }
+            
+            // Cabeçalho da tabela com design premium
+            doc.setFont(undefined, 'bold');
+            doc.setFontSize(9);
+            doc.setFillColor(180, 30, 50);
+            doc.setTextColor(255, 255, 255);
+            doc.rect(15, y - 6, pageWidth - 30, 10, 'F');
+            
+            doc.text('DESCRIÇÃO', 20, y + 1);
+            doc.text('DATA DESPESA', 120, y + 1);
+            doc.text('CATEGORIA', 145, y + 1);
+            doc.text('VALOR (R$)', pageWidth - 20, y + 1, { align: 'right' });
+            
+            y += 14;
+            doc.setFont(undefined, 'normal');
+            doc.setFontSize(9);
+            
+            let totalDespesas = 0;
+            let linhasAdicionadas = 0;
 
             despesasFiltradas.forEach((desp, idx) => {
                 totalDespesas += desp.valor;
                 
-                // Alternância de cores
+                // Zebrado com cores suaves vermelhas
                 if (idx % 2 === 0) {
-                    doc.setFillColor(240, 245, 250);
-                    doc.rect(15, y - 6, pageWidth - 30, 8, 'F');
+                    doc.setFillColor(255, 250, 252);
+                } else {
+                    doc.setFillColor(255, 255, 255);
                 }
+                doc.rect(15, y - 5, pageWidth - 30, 8, 'F');
+                
+                // Borda leve
+                doc.setLineWidth(0.1);
+                doc.setDrawColor(245, 220, 230);
+                doc.rect(15, y - 5, pageWidth - 30, 8);
 
-                doc.setTextColor(30, 30, 30);
-                doc.text(desp.descricao, 20, y);
-                doc.text(formatarData(desp.data), 130, y);
+                doc.setTextColor(51, 51, 51);
+                doc.text(desp.descricao.substring(0, 35), 20, y);
+                doc.text(formatarData(desp.data), 120, y);
+                doc.text('Operacional', 145, y);
                 doc.text(`R$ ${desp.valor.toFixed(2).replace('.', ',')}`, pageWidth - 20, y, { align: 'right' });
+                
                 y += 8;
                 linhasAdicionadas++;
 
                 // Quebra de página
-                if (y > pageHeight - 40) {
+                if (y > pageHeight - 30) {
                     adicionarRodape();
                     doc.addPage();
                     pageNum++;
-                    y = adicionarCabecalho();
+                    y = adicionarCabecalho() + 8;
                     
-                    // Repetir cabeçalho da tabela
+                    // Repetir cabeçalho
                     doc.setFont(undefined, 'bold');
-                    doc.setFontSize(10);
-                    doc.setFillColor(211, 47, 47);
+                    doc.setFontSize(9);
+                    doc.setFillColor(180, 30, 50);
                     doc.setTextColor(255, 255, 255);
-                    doc.rect(15, y - 7, pageWidth - 30, 9, 'F');
-                    doc.text('DESCRIÇÃO', 20, y);
-                    doc.text('DATA', 130, y);
-                    doc.text('VALOR (R$)', 155, y, { align: 'right' });
-                    doc.setTextColor(0, 0, 0);
-                    y += 11;
+                    doc.rect(15, y - 6, pageWidth - 30, 10, 'F');
+                    doc.text('DESCRIÇÃO', 20, y + 1);
+                    doc.text('DATA DESPESA', 120, y + 1);
+                    doc.text('CATEGORIA', 145, y + 1);
+                    doc.text('VALOR (R$)', pageWidth - 20, y + 1, { align: 'right' });
+                    doc.setTextColor(51, 51, 51);
+                    y += 14;
                     doc.setFont(undefined, 'normal');
-                    doc.setFontSize(10);
+                    doc.setFontSize(9);
                 }
             });
 
-            // Linha divisória antes do total
+            // Espaço antes do total
             y += 5;
-            doc.setDrawColor(211, 47, 47);
-            doc.setLineWidth(0.5);
+            
+            // Linha separadora elegante
+            doc.setDrawColor(220, 53, 69);
+            doc.setLineWidth(1);
             doc.line(15, y, pageWidth - 15, y);
             y += 8;
 
-            // Total de despesas
+            // Caixa de total com destaque premium
+            doc.setFillColor(255, 200, 215);
+            doc.setLineWidth(1.2);
+            doc.setDrawColor(180, 30, 50);
+            doc.rect(15, y - 7, pageWidth - 30, 12, 'F');
+            doc.rect(15, y - 7, pageWidth - 30, 12);
+
             doc.setFont(undefined, 'bold');
             doc.setFontSize(11);
-            doc.setTextColor(211, 47, 47);
-            doc.setFillColor(255, 240, 245);
-            doc.rect(15, y - 7, pageWidth - 30, 9, 'F');
-            doc.text('TOTAL DE DESPESAS:', 20, y);
-            doc.text(`R$ ${totalDespesas.toFixed(2).replace('.', ',')}`, pageWidth - 20, y, { align: 'right' });
+            doc.setTextColor(180, 30, 50);
+            doc.text('TOTAL DE DESPESAS', 20, y + 2);
+            doc.text(`R$ ${totalDespesas.toFixed(2).replace('.', ',')}`, pageWidth - 20, y + 2, { align: 'right' });
 
             // Rodapé final
             adicionarRodape();
             
-            doc.save(`despesas-${dataInicio}_ate_${dataFim}.pdf`);
+            doc.save(`ALLIN_DESPESAS_${dataInicio}_ate_${dataFim}.pdf`);
             alert('✅ Relatório de Despesas gerado com sucesso!');
         } catch (erro) {
             console.error('Erro ao gerar PDF:', erro);
