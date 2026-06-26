@@ -2,7 +2,10 @@
 <html lang="pt-BR">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, user-scalable=no, maximum-scale=1.0, minimum-scale=1.0">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="theme-color" content="#1976d2">
     <title>Meus Relatórios - Lucas Brito</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <style>
@@ -10,6 +13,7 @@
             margin: 0;
             padding: 0;
             box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
         }
 
         :root {
@@ -36,6 +40,16 @@
             color: var(--text-primary);
             -webkit-font-smoothing: antialiased;
             -moz-osx-font-smoothing: grayscale;
+            -webkit-user-select: none;
+            user-select: none;
+            overflow-x: hidden;
+            width: 100%;
+            max-width: 100vw;
+        }
+
+        input, textarea, select {
+            -webkit-user-select: text;
+            user-select: text;
         }
 
         /* LOGIN */
@@ -649,37 +663,50 @@
 
         /* MOBILE MÉDIO - 768px e abaixo */
         @media (max-width: 768px) {
+            * {
+                -webkit-touch-callout: none;
+            }
+
             /* LOGIN */
             .login-box {
-                padding: 40px 24px;
-                margin: 20px;
+                padding: 30px 20px;
+                margin: 15px;
                 border-radius: 16px;
+                width: calc(100% - 30px);
             }
 
             .logo-icon img {
                 height: 100px;
-                margin-bottom: 30px;
+                margin-bottom: 25px;
             }
 
             .login-box h1 {
-                font-size: 28px;
+                font-size: 26px;
                 margin-bottom: 8px;
             }
 
             .login-box p {
-                font-size: 14px;
-                margin-bottom: 30px;
+                font-size: 13px;
+                margin-bottom: 25px;
             }
 
             .form-group input {
                 font-size: 16px !important;
+                padding: 12px 14px;
+            }
+
+            .btn {
+                padding: 12px 16px;
+                font-size: 14px;
+                border-radius: 8px;
             }
 
             /* NAVBAR */
             .navbar {
-                padding: 10px 12px;
+                padding: 12px 12px;
                 flex-wrap: wrap;
                 gap: 8px;
+                min-height: auto;
             }
 
             .navbar-left {
@@ -691,95 +718,132 @@
             .navbar-logo {
                 width: 45px;
                 height: 45px;
+                flex-shrink: 0;
             }
 
             .navbar-text h1 {
-                font-size: 14px;
-                margin-bottom: 1px;
+                font-size: 16px;
+                margin-bottom: 2px;
+                overflow: visible;
+                white-space: normal;
             }
 
             .navbar-text p {
-                font-size: 10px;
+                font-size: 11px;
             }
 
             .navbar-right {
-                width: auto;
+                width: 100%;
                 justify-content: flex-end;
-                gap: 6px;
+                gap: 8px;
                 flex-shrink: 0;
             }
 
             .logout-btn {
-                padding: 6px 10px;
-                font-size: 10px;
+                padding: 8px 12px;
+                font-size: 11px;
                 white-space: nowrap;
+                flex-shrink: 0;
             }
 
             /* LAYOUT */
             .content {
                 padding: 16px 12px;
+                max-width: 100%;
             }
 
             .section-title {
                 font-size: 18px;
-                margin-bottom: 16px;
+                margin-bottom: 14px;
+                font-weight: 700;
             }
 
             /* CARDS */
             .card {
                 padding: 16px;
+                border-radius: 12px;
             }
 
-            .card-title {
-                font-size: 12px;
+            .card h3 {
+                font-size: 11px;
+                margin-bottom: 10px;
             }
 
-            .card-value {
-                font-size: 22px;
+            .card .value {
+                font-size: 28px;
             }
 
             .grid {
-                grid-template-columns: 1fr 1fr;
-                gap: 12px;
+                grid-template-columns: 1fr;
+                gap: 14px;
+                margin-bottom: 24px;
+            }
+
+            /* BOTÃO PRIMÁRIO */
+            .btn-primary {
+                width: 100%;
+                margin-bottom: 16px;
+                padding: 12px 16px;
+                font-size: 13px;
             }
 
             /* TABELAS */
             table {
                 font-size: 12px;
-            }
-
-            /* FILTRO DE PERÍODO EM MOBILE */
-            #filtro-pagamento-grid {
-                grid-template-columns: 1fr !important;
+                border-radius: 8px;
             }
 
             table th {
-                padding: 10px 6px;
-                font-size: 11px;
+                padding: 10px 8px;
+                font-size: 10px;
+                font-weight: 700;
             }
 
             table td {
-                padding: 10px 6px;
+                padding: 10px 8px;
+                font-size: 12px;
+            }
+
+            table thead tr {
+                background: #1976d2 !important;
+                color: white !important;
+            }
+
+            table thead th {
+                background: #1976d2 !important;
+                color: white !important;
+                border-bottom: none;
+            }
+
+            table tbody tr:nth-child(even) {
+                background: #f5f5f5 !important;
+            }
+
+            table tbody tr:nth-child(odd) {
+                background: white !important;
             }
 
             .btn-danger {
-                padding: 6px 8px;
-                font-size: 11px;
+                padding: 6px 10px;
+                font-size: 10px;
+                white-space: nowrap;
             }
 
             /* BOTÕES NA TABELA */
             table td:last-child {
                 display: flex;
-                gap: 6px;
+                gap: 4px;
                 justify-content: center;
                 flex-wrap: wrap;
+                padding: 8px 4px;
             }
 
             table td:last-child button {
-                padding: 6px 10px !important;
-                font-size: 11px !important;
+                padding: 6px 8px !important;
+                font-size: 10px !important;
                 flex: 1;
-                min-width: 70px;
+                min-width: 60px;
+                border-radius: 6px !important;
             }
 
             /* FORMS */
@@ -789,20 +853,30 @@
 
             .form-group label {
                 font-size: 11px;
+                font-weight: 700;
+                margin-bottom: 6px;
             }
 
             .form-group input,
             .form-group select,
             .form-group textarea {
+                width: 100%;
+                padding: 11px 12px;
                 font-size: 15px !important;
+                border: 2px solid #ddd;
+                border-radius: 8px;
+                -webkit-appearance: none;
+                appearance: none;
             }
 
-            /* BUTTONS */
-            .btn {
-                padding: 10px 14px;
-                font-size: 13px;
+            .form-group input:focus,
+            .form-group select:focus {
+                border-color: var(--primary);
+                outline: none;
+                box-shadow: 0 0 0 3px rgba(25, 118, 210, 0.1);
             }
 
+            /* INPUT GROUP */
             .input-group {
                 flex-direction: column;
                 gap: 10px;
@@ -817,69 +891,142 @@
             .tabs {
                 padding: 0 8px;
                 gap: 2px;
-                min-height: 48px;
+                min-height: 50px;
+                overflow-x: auto;
+                -webkit-overflow-scrolling: touch;
             }
 
             .tab {
-                padding: 10px 12px;
+                padding: 12px 12px;
                 font-size: 11px;
+                white-space: nowrap;
+                flex-shrink: 0;
+                border: none;
+                background: none;
+            }
+
+            .tab.active {
+                font-weight: 700;
+                color: white;
+                background: linear-gradient(135deg, #1976d2 0%, #1565c0 100%);
+                box-shadow: 0 2px 8px rgba(25, 118, 210, 0.2);
             }
 
             /* MODAL */
+            .modal {
+                padding: 12px;
+                align-items: flex-end;
+            }
+
             .modal-content {
-                width: 90vw !important;
-                max-width: 100%;
-                margin: 20px auto;
-                border-radius: 12px;
+                width: 95vw !important;
+                max-width: 100% !important;
+                margin: 0 auto 0 auto;
+                border-radius: 16px 16px 0 0;
+                max-height: 85vh;
+                overflow-y: auto;
+                padding: 20px;
             }
 
             .modal-header {
-                padding: 16px;
+                padding: 0 0 16px 0;
+                margin-bottom: 16px;
+                border-bottom: 2px solid #e0e0e0;
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
             }
 
             .modal-header h2 {
                 font-size: 18px;
+                margin: 0;
+                flex: 1;
             }
 
-            .modal-body {
-                padding: 14px;
+            .close-modal {
+                font-size: 24px;
+                padding: 0;
+                width: 32px;
+                height: 32px;
             }
 
+            /* EMPTY STATE */
             .empty-state {
                 font-size: 13px;
-                padding: 20px;
+                padding: 30px 16px;
+                text-align: center;
+            }
+
+            /* FILTRO DE DATA */
+            #filtro-pagamento-grid {
+                grid-template-columns: 1fr !important;
+                gap: 10px !important;
+            }
+
+            #filtro-pagamento-grid input {
+                width: 100%;
+            }
+
+            #filtro-pagamento-grid button {
+                width: 100%;
+                padding: 10px 12px;
+                font-size: 12px;
+            }
+
+            /* SCROLL */
+            ::-webkit-scrollbar {
+                height: 6px;
+                width: 6px;
+            }
+
+            ::-webkit-scrollbar-track {
+                background: #f1f1f1;
+            }
+
+            ::-webkit-scrollbar-thumb {
+                background: #1976d2;
+                border-radius: 3px;
+            }
+
+            ::-webkit-scrollbar-thumb:hover {
+                background: #1565c0;
             }
         }
 
         /* MOBILE PEQUENO - 480px e abaixo */
         @media (max-width: 480px) {
-            body {
+            html {
                 font-size: 14px;
+            }
+
+            body {
+                font-size: 13px;
             }
 
             /* LOGIN */
             .login-container::before {
-                width: 200px;
-                height: 200px;
-                top: -50px;
-                right: -50px;
+                width: 180px;
+                height: 180px;
+                top: -40px;
+                right: -40px;
             }
 
             .login-container::after {
-                width: 150px;
-                height: 150px;
-                bottom: -30px;
-                left: -30px;
+                width: 140px;
+                height: 140px;
+                bottom: -20px;
+                left: -20px;
             }
 
             .login-box {
                 padding: 24px 16px;
                 margin: 10px;
-                border-radius: 12px;
+                width: calc(100% - 20px);
+                border-radius: 14px;
             }
 
             .logo-icon {
-                margin-bottom: 24px;
+                margin-bottom: 20px;
             }
 
             .logo-icon img {
@@ -898,7 +1045,7 @@
 
             .login-box p {
                 font-size: 12px;
-                margin-bottom: 20px;
+                margin-bottom: 18px;
             }
 
             .form-group {
@@ -906,58 +1053,63 @@
             }
 
             .form-group label {
-                font-size: 10px;
+                font-size: 11px;
                 margin-bottom: 6px;
             }
 
             .form-group input {
-                padding: 12px 10px;
+                padding: 11px 10px;
                 font-size: 16px !important;
                 border-radius: 8px;
             }
 
             .btn {
-                padding: 12px 12px;
-                font-size: 12px;
+                padding: 11px 12px;
+                font-size: 13px;
                 border-radius: 8px;
             }
 
             /* NAVBAR */
             .navbar {
-                padding: 10px 12px;
-                gap: 8px;
+                padding: 10px 10px;
+                gap: 6px;
+                min-height: auto;
             }
 
             .navbar-left {
-                gap: 10px;
+                gap: 8px;
             }
 
             .navbar-logo {
                 width: 40px;
                 height: 40px;
+                padding: 6px;
             }
 
             .navbar-text h1 {
                 font-size: 14px;
                 margin-bottom: 0;
+                white-space: nowrap;
             }
 
             .navbar-text p {
                 font-size: 10px;
+                margin: 0;
             }
 
             .navbar-right {
+                width: auto;
                 gap: 6px;
             }
 
             .logout-btn {
                 padding: 6px 10px;
-                font-size: 11px;
+                font-size: 10px;
             }
 
             /* LAYOUT */
             .content {
-                padding: 12px;
+                padding: 12px 10px;
             }
 
             .section-title {
@@ -969,89 +1121,68 @@
             /* CARDS */
             .card {
                 padding: 12px;
+                border-radius: 10px;
             }
 
-            .card-title {
-                font-size: 11px;
-                margin-bottom: 6px;
-            }
-
-            .card-value {
-                font-size: 18px;
-            }
-
-            .card-info {
+            .card h3 {
                 font-size: 10px;
-                margin-top: 6px;
+                margin-bottom: 8px;
+            }
+
+            .card .value {
+                font-size: 24px;
             }
 
             .grid {
                 grid-template-columns: 1fr;
-                gap: 8px;
+                gap: 10px;
+                margin-bottom: 16px;
+            }
+
+            /* BOTÃO */
+            .btn-primary {
+                width: 100%;
+                margin-bottom: 12px;
+                padding: 10px 12px;
+                font-size: 12px;
             }
 
             /* TABELAS */
-            .table-wrapper {
-                overflow-x: auto;
-                -webkit-overflow-scrolling: touch;
-                margin: 0 -12px;
-                padding: 0 12px;
-                width: 100vw;
-            }
-
             table {
                 font-size: 11px;
-                min-width: 300px;
-            }
-
-            table thead {
-                background: var(--primary);
-                color: white;
+                border-radius: 6px;
+                margin: 0 -10px;
+                width: calc(100% + 20px);
             }
 
             table th {
                 padding: 8px 6px;
-                font-size: 10px;
+                font-size: 9px;
             }
 
             table td {
-                padding: 8px 4px;
-            }
-
-            table tr:nth-child(even) {
-                background: var(--lighter);
+                padding: 8px 6px;
+                font-size: 11px;
             }
 
             .btn-danger {
-                padding: 4px 6px;
-                font-size: 10px;
+                padding: 5px 8px;
+                font-size: 9px;
             }
 
-            /* BOTÕES NA TABELA - MOBILE PEQUENO */
+            /* BOTÕES NA TABELA */
             table td:last-child {
-                display: flex;
-                gap: 4px;
-                justify-content: center;
-                flex-wrap: wrap;
+                gap: 3px;
+                padding: 6px 3px;
             }
 
             table td:last-child button {
-                padding: 5px 8px !important;
-                font-size: 10px !important;
-                flex: 1;
-                min-width: 60px;
-                border-radius: 6px !important;
+                padding: 5px 6px !important;
+                font-size: 9px !important;
+                min-width: 50px;
             }
 
             /* FORMS */
-            .form-group {
-                margin-bottom: 12px;
-            }
-
-            .form-group label {
-                font-size: 10px;
-            }
-
             .form-group input,
             .form-group select,
             .form-group textarea {
@@ -1059,109 +1190,56 @@
                 font-size: 15px !important;
             }
 
-            /* INPUT GROUP */
-            .input-group {
-                flex-direction: column;
-                gap: 8px;
-            }
-
-            .input-group input {
-                width: 100%;
-            }
-
-            .input-group button {
-                width: 100%;
-                padding: 10px 10px;
-            }
-
             /* TABS */
             .tabs {
-                padding: 0 12px;
-                gap: 2px;
-                margin: 0 -12px;
-                overflow-x: auto;
-                -webkit-overflow-scrolling: touch;
+                padding: 0 8px;
+                min-height: 48px;
             }
 
             .tab {
-                padding: 10px 12px;
-                font-size: 11px;
-                white-space: nowrap;
-            }
-
-            .tab.active {
-                font-weight: 700;
+                padding: 10px 10px;
+                font-size: 10px;
             }
 
             /* MODAL */
-            .modal {
-                padding: 10px;
-            }
-
             .modal-content {
-                width: 95vw !important;
-                margin: 10px auto;
-                border-radius: 10px;
-                max-height: 90vh;
-                overflow-y: auto;
-            }
-
-            .modal-header {
-                padding: 12px;
-                display: flex;
-                justify-content: space-between;
-                align-items: center;
+                border-radius: 14px 14px 0 0;
+                padding: 16px;
             }
 
             .modal-header h2 {
                 font-size: 16px;
-                margin: 0;
             }
 
-            .modal-header button {
-                font-size: 20px;
-                padding: 2px;
-                background: none;
-                border: none;
-                cursor: pointer;
-            }
-
-            .modal-body {
-                padding: 12px;
-            }
-
-            /* TEXT */
+            /* EMPTY STATE */
             .empty-state {
                 font-size: 12px;
-                padding: 16px 12px;
-                text-align: center;
+                padding: 20px 12px;
             }
 
-            /* SCROLL */
-            ::-webkit-scrollbar {
-                height: 6px;
+            #filtro-pagamento-grid {
+                grid-template-columns: 1fr !important;
             }
 
-            ::-webkit-scrollbar-track {
-                background: var(--lighter);
-            }
-
-            ::-webkit-scrollbar-thumb {
-                background: var(--primary);
-                border-radius: 3px;
+            #filtro-pagamento-grid input,
+            #filtro-pagamento-grid button {
+                width: 100%;
+                padding: 10px;
+                font-size: 12px;
             }
         }
 
         /* EXTRA SMALL - 360px e abaixo */
         @media (max-width: 360px) {
             .login-box {
-                padding: 20px 12px;
-                margin: 5px;
+                padding: 20px 14px;
+                margin: 8px;
+                width: calc(100% - 16px);
             }
 
             .logo-icon img {
                 height: 60px;
-                margin-bottom: 20px;
+                margin-bottom: 16px;
             }
 
             .login-box h1 {
@@ -1170,11 +1248,11 @@
 
             .login-box p {
                 font-size: 11px;
-                margin-bottom: 16px;
+                margin-bottom: 14px;
             }
 
             .navbar {
-                padding: 8px 10px;
+                padding: 8px;
             }
 
             .navbar-text h1 {
@@ -1186,19 +1264,19 @@
             }
 
             .content {
-                padding: 10px;
+                padding: 10px 8px;
             }
 
             .section-title {
-                font-size: 14px;
+                font-size: 15px;
             }
 
             .card {
                 padding: 10px;
             }
 
-            .card-value {
-                font-size: 16px;
+            .card .value {
+                font-size: 22px;
             }
 
             table {
@@ -1211,8 +1289,8 @@
             }
 
             .btn {
-                padding: 10px 10px;
-                font-size: 11px;
+                padding: 10px;
+                font-size: 12px;
             }
         }
     </style>
@@ -1598,6 +1676,8 @@
         
         if (senha === SENHA) {
             errorDiv.style.display = 'none';
+            localStorage.setItem('logado', 'true');
+            localStorage.setItem('dataLogin', new Date().getTime());
             document.getElementById('loginScreen').classList.add('hidden');
             document.getElementById('dashboard').classList.remove('hidden');
             carregarDados();
@@ -1612,13 +1692,40 @@
     }
 
     function logout() {
+        localStorage.setItem('logado', 'false');
+        localStorage.removeItem('dataLogin');
+        localStorage.removeItem('abaAtiva');
         document.getElementById('loginScreen').classList.remove('hidden');
         document.getElementById('dashboard').classList.add('hidden');
         document.getElementById('passwordInput').value = '';
         document.getElementById('loginError').style.display = 'none';
     }
 
+    function verificarSessao() {
+        const estaLogado = localStorage.getItem('logado') === 'true';
+        
+        if (estaLogado) {
+            document.getElementById('loginScreen').classList.add('hidden');
+            document.getElementById('dashboard').classList.remove('hidden');
+            carregarDados();
+            atualizarTelas();
+            
+            // Restaurar aba ativa
+            const abaAtiva = localStorage.getItem('abaAtiva') || 'funcionarios';
+            const tabContent = document.querySelectorAll('.tab-content');
+            const tabs = document.querySelectorAll('.tab');
+            
+            tabContent.forEach(el => el.classList.add('hidden'));
+            tabs.forEach(el => el.classList.remove('active'));
+            
+            document.getElementById('tab-' + abaAtiva).classList.remove('hidden');
+            const tabAtivo = Array.from(tabs).find(tab => tab.textContent.toLowerCase().includes(['funcionarios', 'pagamentos', 'despesas', 'relatório'][['funcionarios', 'pagamentos', 'despesas', 'relatorio'].indexOf(abaAtiva)].replace('á', 'a')));
+            if (tabAtivo) tabAtivo.classList.add('active');
+        }
+    }
+
     function changeTab(tab) {
+        localStorage.setItem('abaAtiva', tab);
         document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden'));
         document.getElementById('tab-' + tab).classList.remove('hidden');
         document.querySelectorAll('.tab').forEach(el => el.classList.remove('active'));
@@ -1854,82 +1961,156 @@
             const { jsPDF } = window.jspdf;
             const doc = new jsPDF();
             const pageWidth = doc.internal.pageSize.getWidth();
-            let y = 30;
-
+            const pageHeight = doc.internal.pageSize.getHeight();
+            let pageNum = 1;
+            
+            function adicionarCabecalho(isFirstPage = false) {
+                // Fundo cinza suave no topo
+                doc.setFillColor(245, 247, 250);
+                doc.rect(0, 0, pageWidth, 35, 'F');
+                
+                // Logo da empresa
+                doc.setFontSize(18);
+                doc.setTextColor(25, 118, 210);
+                doc.setFont(undefined, 'bold');
+                doc.text('ALL IN EVENTOS', 20, 12);
+                
+                // Divisor
+                doc.setDrawColor(25, 118, 210);
+                doc.setLineWidth(0.5);
+                doc.line(20, 16, pageWidth - 20, 16);
+                
+                // Informações
+                doc.setFontSize(9);
+                doc.setTextColor(100, 100, 100);
+                doc.setFont(undefined, 'normal');
+                if (isFirstPage) {
+                    doc.text('Extrato Individual de Pagamentos', 20, 25);
+                }
+                doc.text(`Página ${pageNum}`, pageWidth - 30, 25);
+                
+                return 40;
+            }
+            
+            function adicionarRodape() {
+                // Linha divisória
+                doc.setDrawColor(200, 200, 200);
+                doc.setLineWidth(0.3);
+                doc.line(20, pageHeight - 20, pageWidth - 20, pageHeight - 20);
+                
+                // Rodapé
+                doc.setFontSize(8);
+                doc.setTextColor(120, 120, 120);
+                doc.setFont(undefined, 'normal');
+                doc.text('Documento confidencial - Gerado automaticamente pelo sistema', pageWidth / 2, pageHeight - 12, { align: 'center' });
+                doc.text(new Date().toLocaleDateString('pt-BR') + ' às ' + new Date().toLocaleTimeString('pt-BR'), pageWidth / 2, pageHeight - 8, { align: 'center' });
+            }
+            
+            // Primeira página - Cabeçalho
+            let y = adicionarCabecalho(true);
+            
+            // Título
+            doc.setFontSize(22);
+            doc.setTextColor(25, 118, 210);
             doc.setFont(undefined, 'bold');
-            doc.setFontSize(24);
             doc.text('EXTRATO DE PAGAMENTOS', pageWidth / 2, y, { align: 'center' });
             y += 12;
-
-            doc.setFont(undefined, 'normal');
+            
+            // Informações do funcionário
             doc.setFontSize(11);
+            doc.setTextColor(80, 80, 80);
+            doc.setFont(undefined, 'bold');
             doc.text(`Funcionário: ${func.nome}`, 20, y);
             y += 6;
+            
+            doc.setFont(undefined, 'normal');
             doc.text(`CPF: ${func.cpf}`, 20, y);
             y += 6;
             doc.text(`Período: ${formatarData(dataInicio)} até ${formatarData(dataFim)}`, 20, y);
-            y += 6;
-            doc.text(`Gerado em: ${new Date().toLocaleDateString('pt-BR')}`, 20, y);
-            y += 10;
-
-            doc.setDrawColor(0, 123, 255);
+            y += 8;
+            
+            // Separador visual
+            doc.setDrawColor(200, 200, 200);
+            doc.setLineWidth(0.4);
             doc.line(20, y, pageWidth - 20, y);
-            y += 10;
-
-            doc.setFont(undefined, 'bold');
-            doc.setFontSize(11);
-            doc.setFillColor(0, 123, 255);
-            doc.setTextColor(255, 255, 255);
-            doc.rect(20, y - 7, pageWidth - 40, 8, 'F');
-            doc.text('DATA', 25, y);
-            doc.text('DESCRIÇÃO', 70, y);
-            doc.text('VALOR', 160, y);
-            doc.setTextColor(0, 0, 0);
             y += 12;
-
+            
+            // Cabeçalho da tabela
+            doc.setFont(undefined, 'bold');
+            doc.setFontSize(10);
+            doc.setFillColor(25, 118, 210);
+            doc.setTextColor(255, 255, 255);
+            doc.rect(15, y - 7, pageWidth - 30, 9, 'F');
+            doc.text('DATA', 20, y);
+            doc.text('DESCRIÇÃO', 70, y);
+            doc.text('VALOR (R$)', 155, y, { align: 'right' });
+            doc.setTextColor(0, 0, 0);
+            y += 11;
+            
+            // Conteúdo da tabela
             doc.setFont(undefined, 'normal');
             doc.setFontSize(10);
             let totalIndividual = 0;
+            let linhasAdicionadas = 0;
 
             pagamentosFiltrados.forEach((pag, index) => {
                 totalIndividual += pag.valor;
 
+                // Alternância de cores
                 if (index % 2 === 0) {
-                    doc.setFillColor(240, 240, 240);
-                    doc.rect(20, y - 6, pageWidth - 40, 8, 'F');
+                    doc.setFillColor(240, 245, 250);
+                    doc.rect(15, y - 6, pageWidth - 30, 8, 'F');
                 }
 
-                doc.setTextColor(0, 0, 0);
-                doc.text(formatarData(pag.data), 25, y);
+                doc.setTextColor(30, 30, 30);
+                doc.text(formatarData(pag.data), 20, y);
                 doc.text(pag.descricao || '-', 70, y);
-                doc.text(`R$ ${pag.valor.toFixed(2).replace('.', ',')}`, 160, y);
+                doc.text(`R$ ${pag.valor.toFixed(2).replace('.', ',')}`, pageWidth - 20, y, { align: 'right' });
                 y += 8;
+                linhasAdicionadas++;
 
-                if (y > 250) {
+                // Quebra de página
+                if (y > pageHeight - 40) {
+                    adicionarRodape();
                     doc.addPage();
-                    y = 20;
+                    pageNum++;
+                    y = adicionarCabecalho();
+                    
+                    // Repetir cabeçalho da tabela
+                    doc.setFont(undefined, 'bold');
+                    doc.setFontSize(10);
+                    doc.setFillColor(25, 118, 210);
+                    doc.setTextColor(255, 255, 255);
+                    doc.rect(15, y - 7, pageWidth - 30, 9, 'F');
+                    doc.text('DATA', 20, y);
+                    doc.text('DESCRIÇÃO', 70, y);
+                    doc.text('VALOR (R$)', 155, y, { align: 'right' });
+                    doc.setTextColor(0, 0, 0);
+                    y += 11;
+                    doc.setFont(undefined, 'normal');
+                    doc.setFontSize(10);
                 }
             });
 
+            // Linha divisória antes do total
             y += 5;
-            doc.setDrawColor(0, 123, 255);
-            doc.line(20, y, pageWidth - 20, y);
-            y += 10;
+            doc.setDrawColor(25, 118, 210);
+            doc.setLineWidth(0.5);
+            doc.line(15, y, pageWidth - 15, y);
+            y += 8;
 
+            // Total individual
             doc.setFont(undefined, 'bold');
-            doc.setFontSize(12);
-            doc.setTextColor(0, 123, 255);
-            doc.text('TOTAL:', 25, y);
-            doc.text(`R$ ${totalIndividual.toFixed(2).replace('.', ',')}`, 160, y);
+            doc.setFontSize(11);
+            doc.setTextColor(25, 118, 210);
+            doc.setFillColor(240, 248, 255);
+            doc.rect(15, y - 7, pageWidth - 30, 9, 'F');
+            doc.text('TOTAL:', 20, y);
+            doc.text(`R$ ${totalIndividual.toFixed(2).replace('.', ',')}`, pageWidth - 20, y, { align: 'right' });
 
-            doc.setTextColor(0, 0, 0);
-            y += 15;
-
-            doc.setFont(undefined, 'normal');
-            doc.setFontSize(9);
-            doc.setTextColor(150, 150, 150);
-            doc.text('Extrato de pagamento gerado automaticamente pelo sistema', pageWidth / 2, doc.internal.pageSize.getHeight() - 10, { align: 'center' });
-
+            // Rodapé final
+            adicionarRodape();
+            
             doc.save(`pagamento_${func.nome}_${dataInicio}_ate_${dataFim}.pdf`);
             alert('✅ Extrato de Pagamento gerado com sucesso!');
             closarModalPDFIndividual();
@@ -2032,38 +2213,91 @@
             const { jsPDF } = window.jspdf;
             const doc = new jsPDF();
             const pageWidth = doc.internal.pageSize.getWidth();
-            let y = 30;
-
+            const pageHeight = doc.internal.pageSize.getHeight();
+            let pageNum = 1;
+            
+            function adicionarCabecalho(isFirstPage = false) {
+                // Fundo cinza suave no topo
+                doc.setFillColor(245, 247, 250);
+                doc.rect(0, 0, pageWidth, 35, 'F');
+                
+                // Logo da empresa
+                doc.setFontSize(18);
+                doc.setTextColor(25, 118, 210);
+                doc.setFont(undefined, 'bold');
+                doc.text('ALL IN EVENTOS', 20, 12);
+                
+                // Divisor
+                doc.setDrawColor(25, 118, 210);
+                doc.setLineWidth(0.5);
+                doc.line(20, 16, pageWidth - 20, 16);
+                
+                // Informações
+                doc.setFontSize(9);
+                doc.setTextColor(100, 100, 100);
+                doc.setFont(undefined, 'normal');
+                if (isFirstPage) {
+                    doc.text('Sistema de Gestão de Pagamentos', 20, 25);
+                }
+                doc.text(`Página ${pageNum}`, pageWidth - 30, 25);
+                
+                return 40;
+            }
+            
+            function adicionarRodape() {
+                // Linha divisória
+                doc.setDrawColor(200, 200, 200);
+                doc.setLineWidth(0.3);
+                doc.line(20, pageHeight - 20, pageWidth - 20, pageHeight - 20);
+                
+                // Rodapé
+                doc.setFontSize(8);
+                doc.setTextColor(120, 120, 120);
+                doc.setFont(undefined, 'normal');
+                doc.text('Documento confidencial - Gerado automaticamente pelo sistema', pageWidth / 2, pageHeight - 12, { align: 'center' });
+                doc.text(new Date().toLocaleDateString('pt-BR') + ' às ' + new Date().toLocaleTimeString('pt-BR'), pageWidth / 2, pageHeight - 8, { align: 'center' });
+            }
+            
+            // Primeira página - Cabeçalho
+            let y = adicionarCabecalho(true);
+            
+            // Título
+            doc.setFontSize(22);
+            doc.setTextColor(25, 118, 210);
             doc.setFont(undefined, 'bold');
-            doc.setFontSize(24);
             doc.text('FOLHA DE PAGAMENTO', pageWidth / 2, y, { align: 'center' });
-            y += 12;
-
-            doc.setFont(undefined, 'normal');
+            y += 10;
+            
+            // Período
             doc.setFontSize(11);
+            doc.setTextColor(80, 80, 80);
+            doc.setFont(undefined, 'normal');
             doc.text(`Período: ${formatarData(dataInicio)} até ${formatarData(dataFim)}`, pageWidth / 2, y, { align: 'center' });
             y += 8;
-            doc.text(`Gerado em: ${new Date().toLocaleDateString('pt-BR')}`, 20, y);
-            y += 10;
-
-            doc.setDrawColor(0, 123, 255);
+            
+            // Separador visual
+            doc.setDrawColor(200, 200, 200);
+            doc.setLineWidth(0.4);
             doc.line(20, y, pageWidth - 20, y);
-            y += 10;
-
-            doc.setFont(undefined, 'bold');
-            doc.setFontSize(11);
-            doc.setFillColor(0, 123, 255);
-            doc.setTextColor(255, 255, 255);
-            doc.rect(20, y - 7, pageWidth - 40, 8, 'F');
-            doc.text('FUNCIONÁRIO', 25, y);
-            doc.text('CPF', 95, y);
-            doc.text('VALOR', 160, y);
-            doc.setTextColor(0, 0, 0);
             y += 12;
-
+            
+            // Cabeçalho da tabela
+            doc.setFont(undefined, 'bold');
+            doc.setFontSize(10);
+            doc.setFillColor(25, 118, 210);
+            doc.setTextColor(255, 255, 255);
+            doc.rect(15, y - 7, pageWidth - 30, 9, 'F');
+            doc.text('FUNCIONÁRIO', 20, y);
+            doc.text('CPF', 100, y);
+            doc.text('VALOR (R$)', 155, y, { align: 'right' });
+            doc.setTextColor(0, 0, 0);
+            y += 11;
+            
+            // Conteúdo da tabela
             doc.setFont(undefined, 'normal');
             doc.setFontSize(10);
             let totalFolha = 0;
+            let linhasAdicionadas = 0;
 
             dados.funcionarios.forEach((func, index) => {
                 const pagamentosFiltrados = dados.pagamentos.filter(p => 
@@ -2075,20 +2309,39 @@
                 if (totalFunc === 0) return;
                 totalFolha += totalFunc;
 
-                if (index % 2 === 0) {
-                    doc.setFillColor(240, 240, 240);
-                    doc.rect(20, y - 6, pageWidth - 40, 8, 'F');
+                // Alternância de cores
+                if (linhasAdicionadas % 2 === 0) {
+                    doc.setFillColor(240, 245, 250);
+                    doc.rect(15, y - 6, pageWidth - 30, 8, 'F');
                 }
 
-                doc.setTextColor(0, 0, 0);
-                doc.text(func.nome, 25, y);
-                doc.text(func.cpf, 95, y);
-                doc.text(`R$ ${totalFunc.toFixed(2).replace('.', ',')}`, 160, y);
+                doc.setTextColor(30, 30, 30);
+                doc.text(func.nome, 20, y);
+                doc.text(func.cpf, 100, y);
+                doc.text(`R$ ${totalFunc.toFixed(2).replace('.', ',')}`, pageWidth - 20, y, { align: 'right' });
                 y += 8;
+                linhasAdicionadas++;
 
-                if (y > 250) {
+                // Quebra de página
+                if (y > pageHeight - 40) {
+                    adicionarRodape();
                     doc.addPage();
-                    y = 20;
+                    pageNum++;
+                    y = adicionarCabecalho();
+                    
+                    // Repetir cabeçalho da tabela
+                    doc.setFont(undefined, 'bold');
+                    doc.setFontSize(10);
+                    doc.setFillColor(25, 118, 210);
+                    doc.setTextColor(255, 255, 255);
+                    doc.rect(15, y - 7, pageWidth - 30, 9, 'F');
+                    doc.text('FUNCIONÁRIO', 20, y);
+                    doc.text('CPF', 100, y);
+                    doc.text('VALOR (R$)', 155, y, { align: 'right' });
+                    doc.setTextColor(0, 0, 0);
+                    y += 11;
+                    doc.setFont(undefined, 'normal');
+                    doc.setFontSize(10);
                 }
             });
 
@@ -2097,25 +2350,25 @@
                 return;
             }
 
+            // Linha divisória antes do total
             y += 5;
-            doc.setDrawColor(0, 123, 255);
-            doc.line(20, y, pageWidth - 20, y);
-            y += 10;
+            doc.setDrawColor(25, 118, 210);
+            doc.setLineWidth(0.5);
+            doc.line(15, y, pageWidth - 15, y);
+            y += 8;
 
+            // Total da folha
             doc.setFont(undefined, 'bold');
-            doc.setFontSize(12);
-            doc.setTextColor(0, 123, 255);
-            doc.text('TOTAL DA FOLHA:', 25, y);
-            doc.text(`R$ ${totalFolha.toFixed(2).replace('.', ',')}`, 160, y);
+            doc.setFontSize(11);
+            doc.setTextColor(25, 118, 210);
+            doc.setFillColor(240, 248, 255);
+            doc.rect(15, y - 7, pageWidth - 30, 9, 'F');
+            doc.text('TOTAL DA FOLHA:', 20, y);
+            doc.text(`R$ ${totalFolha.toFixed(2).replace('.', ',')}`, pageWidth - 20, y, { align: 'right' });
 
-            doc.setTextColor(0, 0, 0);
-            y += 15;
-
-            doc.setFont(undefined, 'normal');
-            doc.setFontSize(9);
-            doc.setTextColor(150, 150, 150);
-            doc.text('Relatório de pagamentos gerado automaticamente pelo sistema', pageWidth / 2, doc.internal.pageSize.getHeight() - 10, { align: 'center' });
-
+            // Rodapé final
+            adicionarRodape();
+            
             doc.save(`pagamentos-${dataInicio}_ate_${dataFim}.pdf`);
             alert('✅ Relatório de Pagamentos gerado com sucesso!');
         } catch (erro) {
@@ -2132,87 +2385,160 @@
             }
 
             const { jsPDF } = window.jspdf;
-        const doc = new jsPDF();
-        const pageWidth = doc.internal.pageSize.getWidth();
-        let y = 30;
+            const doc = new jsPDF();
+            const pageWidth = doc.internal.pageSize.getWidth();
+            const pageHeight = doc.internal.pageSize.getHeight();
+            let pageNum = 1;
+            
+            function adicionarCabecalho(isFirstPage = false) {
+                // Fundo cinza suave no topo
+                doc.setFillColor(245, 247, 250);
+                doc.rect(0, 0, pageWidth, 35, 'F');
+                
+                // Logo da empresa
+                doc.setFontSize(18);
+                doc.setTextColor(211, 47, 47);
+                doc.setFont(undefined, 'bold');
+                doc.text('ALL IN EVENTOS', 20, 12);
+                
+                // Divisor
+                doc.setDrawColor(211, 47, 47);
+                doc.setLineWidth(0.5);
+                doc.line(20, 16, pageWidth - 20, 16);
+                
+                // Informações
+                doc.setFontSize(9);
+                doc.setTextColor(100, 100, 100);
+                doc.setFont(undefined, 'normal');
+                if (isFirstPage) {
+                    doc.text('Sistema de Gestão de Despesas', 20, 25);
+                }
+                doc.text(`Página ${pageNum}`, pageWidth - 30, 25);
+                
+                return 40;
+            }
+            
+            function adicionarRodape() {
+                // Linha divisória
+                doc.setDrawColor(200, 200, 200);
+                doc.setLineWidth(0.3);
+                doc.line(20, pageHeight - 20, pageWidth - 20, pageHeight - 20);
+                
+                // Rodapé
+                doc.setFontSize(8);
+                doc.setTextColor(120, 120, 120);
+                doc.setFont(undefined, 'normal');
+                doc.text('Documento confidencial - Gerado automaticamente pelo sistema', pageWidth / 2, pageHeight - 12, { align: 'center' });
+                doc.text(new Date().toLocaleDateString('pt-BR') + ' às ' + new Date().toLocaleTimeString('pt-BR'), pageWidth / 2, pageHeight - 8, { align: 'center' });
+            }
+            
+            // Primeira página - Cabeçalho
+            let y = adicionarCabecalho(true);
+            
+            // Título
+            doc.setFontSize(22);
+            doc.setTextColor(211, 47, 47);
+            doc.setFont(undefined, 'bold');
+            doc.text('RELATÓRIO DE DESPESAS', pageWidth / 2, y, { align: 'center' });
+            y += 10;
+            
+            // Período
+            doc.setFontSize(11);
+            doc.setTextColor(80, 80, 80);
+            doc.setFont(undefined, 'normal');
+            doc.text(`Período: ${formatarData(dataInicio)} até ${formatarData(dataFim)}`, pageWidth / 2, y, { align: 'center' });
+            y += 8;
+            
+            // Separador visual
+            doc.setDrawColor(200, 200, 200);
+            doc.setLineWidth(0.4);
+            doc.line(20, y, pageWidth - 20, y);
+            y += 12;
+            
+            // Cabeçalho da tabela
+            doc.setFont(undefined, 'bold');
+            doc.setFontSize(10);
+            doc.setFillColor(211, 47, 47);
+            doc.setTextColor(255, 255, 255);
+            doc.rect(15, y - 7, pageWidth - 30, 9, 'F');
+            doc.text('DESCRIÇÃO', 20, y);
+            doc.text('DATA', 130, y);
+            doc.text('VALOR (R$)', 155, y, { align: 'right' });
+            doc.setTextColor(0, 0, 0);
+            y += 11;
+            
+            // Conteúdo da tabela
+            const despesasFiltradas = dados.despesas.filter(d => d.data >= dataInicio && d.data <= dataFim);
+            let totalDespesas = 0;
+            let linhasAdicionadas = 0;
 
-        doc.setFont(undefined, 'bold');
-        doc.setFontSize(24);
-        doc.text('RELATÓRIO DE DESPESAS', pageWidth / 2, y, { align: 'center' });
-        y += 12;
+            doc.setFont(undefined, 'normal');
+            doc.setFontSize(10);
 
-        doc.setFont(undefined, 'normal');
-        doc.setFontSize(11);
-        doc.text(`Período: ${formatarData(dataInicio)} até ${formatarData(dataFim)}`, pageWidth / 2, y, { align: 'center' });
-        y += 8;
-        doc.text(`Gerado em: ${new Date().toLocaleDateString('pt-BR')}`, 20, y);
-        y += 10;
-
-        doc.setDrawColor(231, 76, 60);
-        doc.line(20, y, pageWidth - 20, y);
-        y += 10;
-
-        doc.setFont(undefined, 'bold');
-        doc.setFontSize(11);
-        doc.setFillColor(231, 76, 60);
-        doc.setTextColor(255, 255, 255);
-        doc.rect(20, y - 7, pageWidth - 40, 8, 'F');
-        doc.text('DESCRIÇÃO', 25, y);
-        doc.text('DATA', 115, y);
-        doc.text('VALOR', 160, y);
-        doc.setTextColor(0, 0, 0);
-        y += 12;
-
-        const despesasFiltradas = dados.despesas.filter(d => d.data >= dataInicio && d.data <= dataFim);
-        let totalDespesas = 0;
-
-        doc.setFont(undefined, 'normal');
-        doc.setFontSize(10);
-
-        if (despesasFiltradas.length === 0) {
-            alert('⚠️ Nenhuma despesa encontrada neste período!');
-            return;
-        }
-
-        despesasFiltradas.forEach((desp, idx) => {
-            totalDespesas += desp.valor;
-            if (idx % 2 === 0) {
-                doc.setFillColor(240, 240, 240);
-                doc.rect(20, y - 6, pageWidth - 40, 8, 'F');
+            if (despesasFiltradas.length === 0) {
+                alert('⚠️ Nenhuma despesa encontrada neste período!');
+                return;
             }
 
-            doc.setTextColor(0, 0, 0);
-            doc.text(desp.descricao, 25, y);
-            doc.text(formatarData(desp.data), 115, y);
-            doc.text(`R$ ${desp.valor.toFixed(2).replace('.', ',')}`, 160, y);
+            despesasFiltradas.forEach((desp, idx) => {
+                totalDespesas += desp.valor;
+                
+                // Alternância de cores
+                if (idx % 2 === 0) {
+                    doc.setFillColor(240, 245, 250);
+                    doc.rect(15, y - 6, pageWidth - 30, 8, 'F');
+                }
+
+                doc.setTextColor(30, 30, 30);
+                doc.text(desp.descricao, 20, y);
+                doc.text(formatarData(desp.data), 130, y);
+                doc.text(`R$ ${desp.valor.toFixed(2).replace('.', ',')}`, pageWidth - 20, y, { align: 'right' });
+                y += 8;
+                linhasAdicionadas++;
+
+                // Quebra de página
+                if (y > pageHeight - 40) {
+                    adicionarRodape();
+                    doc.addPage();
+                    pageNum++;
+                    y = adicionarCabecalho();
+                    
+                    // Repetir cabeçalho da tabela
+                    doc.setFont(undefined, 'bold');
+                    doc.setFontSize(10);
+                    doc.setFillColor(211, 47, 47);
+                    doc.setTextColor(255, 255, 255);
+                    doc.rect(15, y - 7, pageWidth - 30, 9, 'F');
+                    doc.text('DESCRIÇÃO', 20, y);
+                    doc.text('DATA', 130, y);
+                    doc.text('VALOR (R$)', 155, y, { align: 'right' });
+                    doc.setTextColor(0, 0, 0);
+                    y += 11;
+                    doc.setFont(undefined, 'normal');
+                    doc.setFontSize(10);
+                }
+            });
+
+            // Linha divisória antes do total
+            y += 5;
+            doc.setDrawColor(211, 47, 47);
+            doc.setLineWidth(0.5);
+            doc.line(15, y, pageWidth - 15, y);
             y += 8;
 
-            if (y > 250) {
-                doc.addPage();
-                y = 20;
-            }
-        });
+            // Total de despesas
+            doc.setFont(undefined, 'bold');
+            doc.setFontSize(11);
+            doc.setTextColor(211, 47, 47);
+            doc.setFillColor(255, 240, 245);
+            doc.rect(15, y - 7, pageWidth - 30, 9, 'F');
+            doc.text('TOTAL DE DESPESAS:', 20, y);
+            doc.text(`R$ ${totalDespesas.toFixed(2).replace('.', ',')}`, pageWidth - 20, y, { align: 'right' });
 
-        y += 5;
-        doc.setDrawColor(231, 76, 60);
-        doc.line(20, y, pageWidth - 20, y);
-        y += 10;
-
-        doc.setFont(undefined, 'bold');
-        doc.setFontSize(12);
-        doc.setTextColor(231, 76, 60);
-        doc.text('TOTAL DE DESPESAS:', 25, y);
-        doc.text(`R$ ${totalDespesas.toFixed(2).replace('.', ',')}`, 160, y);
-
-        doc.setTextColor(0, 0, 0);
-        y += 15;
-
-        doc.setFont(undefined, 'normal');
-        doc.setFontSize(9);
-        doc.setTextColor(150, 150, 150);
-        doc.text('Relatório de despesas gerado automaticamente pelo sistema', pageWidth / 2, doc.internal.pageSize.getHeight() - 10, { align: 'center' });
-
-        doc.save(`despesas-${dataInicio}_ate_${dataFim}.pdf`);
+            // Rodapé final
+            adicionarRodape();
+            
+            doc.save(`despesas-${dataInicio}_ate_${dataFim}.pdf`);
             alert('✅ Relatório de Despesas gerado com sucesso!');
         } catch (erro) {
             console.error('Erro ao gerar PDF:', erro);
@@ -2331,6 +2657,18 @@
         setTimeout(() => {
             relTable.scrollIntoView({ behavior: 'smooth', block: 'start' });
         }, 100);
+    }
+
+    // Verificar sessão ao carregar a página
+    document.addEventListener('DOMContentLoaded', function() {
+        verificarSessao();
+    });
+
+    // Também verificar imediatamente se o documento já foi carregado
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', verificarSessao);
+    } else {
+        verificarSessao();
     }
 </script>
 
