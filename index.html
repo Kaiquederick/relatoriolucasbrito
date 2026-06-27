@@ -8,7 +8,6 @@
     <meta name="theme-color" content="#1976d2">
     <title>Meus Relatórios - Lucas Brito</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
         * {
             margin: 0;
@@ -1750,24 +1749,13 @@
 </div>
 
 <script>
-    // ╔═══════════════════════════════════════════════════════════════╗
-    //  ║  CONFIGURAÇÃO DO SUPABASE — EDITE SÓ ESTAS 2 LINHAS ABAIXO     ║
-    //  ╚═══════════════════════════════════════════════════════════════╝
-    //  1) URL: pegue em Supabase > Settings > API (algo como https://xxxx.supabase.co)
-    //  2) KEY: a chave "Publishable" (sb_publishable_...) OU a "anon" (legada).
-    //          Essa chave é PÚBLICA e pode ficar aqui — a segurança vem do login + RLS.
-    const SUPABASE_URL = 'COLE_AQUI_A_SUA_URL';
-    const SUPABASE_KEY = 'COLE_AQUI_A_SUA_CHAVE';
-
-    // Cria a conexão com o Supabase
-    const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
-
     // ═══════════════════════════════════════════════════════════════
-    //  SINCRONIZAÇÃO PELO SUPABASE
-    //  Os dados ficam num banco na nuvem. Fazendo login em qualquer
-    //  aparelho, os dados aparecem automaticamente sincronizados.
+    //  SINCRONIZAÇÃO (armazenamento próprio do Claude — sem cadastro)
+    //  Os dados ficam ligados à sua conta do Claude. Abrindo este
+    //  artifact em qualquer aparelho com a mesma conta, os dados
+    //  aparecem automaticamente sincronizados.
     // ═══════════════════════════════════════════════════════════════
-    const ID_REGISTRO = 'principal'; // tudo fica em uma única linha da tabela "relatorios"
+    const CHAVE_STORAGE = 'allin_eventos_dados';
     let salvandoNaNuvem = false;
     let ultimaVersaoSalva = '';
 
@@ -1784,37 +1772,29 @@
         el.textContent = texto;
     }
 
-    // Lê os dados do banco do Supabase
+    // Lê os dados do armazenamento do Claude
     async function lerNuvem() {
         try {
-            const { data, error } = await supabaseClient
-                .from('relatorios')
-                .select('dados')
-                .eq('id', ID_REGISTRO)
-                .maybeSingle();
-            if (error) throw error;
-            if (data && data.dados) {
+            const resultado = await window.storage.get(CHAVE_STORAGE, false);
+            if (resultado && resultado.value) {
                 mostrarStatusSync('✅ Sincronizado ' + new Date().toLocaleTimeString(), '#27ae60');
-                // jsonb já volta como objeto; mas tratamos string por segurança
-                return typeof data.dados === 'string' ? JSON.parse(data.dados) : data.dados;
+                return JSON.parse(resultado.value);
             }
-            mostrarStatusSync('ℹ️ Nenhum dado salvo ainda', '#3498db');
         } catch (e) {
-            mostrarStatusSync('❌ Erro ao ler: ' + e.message, '#e74c3c');
+            // Chave ainda não existe na primeira vez — normal
+            mostrarStatusSync('ℹ️ Nenhum dado salvo ainda', '#3498db');
         }
         return null;
     }
 
-    // Salva os dados no banco do Supabase
+    // Salva os dados no armazenamento do Claude
     async function salvarNuvem() {
         if (salvandoNaNuvem) return;
         salvandoNaNuvem = true;
         try {
-            const { error } = await supabaseClient
-                .from('relatorios')
-                .upsert({ id: ID_REGISTRO, dados: dados, atualizado_em: new Date().toISOString() });
-            if (error) throw error;
-            ultimaVersaoSalva = JSON.stringify(dados);
+            const textoDados = JSON.stringify(dados);
+            await window.storage.set(CHAVE_STORAGE, textoDados, false);
+            ultimaVersaoSalva = textoDados;
             mostrarStatusSync('✅ Salvo ' + new Date().toLocaleTimeString(), '#27ae60');
         } catch (e) {
             mostrarStatusSync('❌ Erro ao salvar: ' + e.message, '#e74c3c');
@@ -1823,6 +1803,8 @@
         }
     }
 
+    const USUARIO = 'Allin';
+    const SENHA = 'Pedro2606';
     let dados = { 
         funcionarios: [
             { id: 1, nome: 'João Silva', cpf: '123.456.789-00' },
@@ -1891,70 +1873,43 @@
     let sessaoLogado = false;
     let abaAtivaAtual = 'funcionarios';
 
-    // Converte o que foi digitado num e-mail (o login do Supabase usa e-mail).
-    // Você pode digitar "Allin" (vira o e-mail abaixo) OU já digitar o e-mail completo.
-    function resolverEmail(login) {
-        if (!login) return '';
-        if (login.includes('@')) return login;
-        const mapa = {
-            'allin': 'allin@allineventos.app'   // usuário simples -> e-mail cadastrado no Supabase
-        };
-        return mapa[login.toLowerCase()] || login;
-    }
-
-    async function login() {
+    function login() {
         const usuario = document.getElementById('usernameInput').value.trim();
         const senha = document.getElementById('passwordInput').value.trim();
         const errorDiv = document.getElementById('loginError');
-        const email = resolverEmail(usuario);
-
-        errorDiv.style.display = 'none';
-
-        const { error } = await supabaseClient.auth.signInWithPassword({
-            email: email,
-            password: senha
-        });
-
-        if (error) {
+        
+        if (usuario === USUARIO && senha === SENHA) {
+            errorDiv.style.display = 'none';
+            sessaoLogado = true;
+            document.getElementById('loginScreen').classList.add('hidden');
+            document.getElementById('dashboard').classList.remove('hidden');
+            carregarDados();
+            atualizarTelas();
+            iniciarSincronizacaoAutomatica(); // ✅ Iniciar sincronização automática
+        } else {
             errorDiv.style.display = 'block';
             document.getElementById('passwordInput').value = '';
             document.getElementById('usernameInput').focus();
-            return;
         }
-
-        entrarNoApp();
     }
 
-    function entrarNoApp() {
-        sessaoLogado = true;
-        document.getElementById('loginScreen').classList.add('hidden');
-        document.getElementById('dashboard').classList.remove('hidden');
-        carregarDados();
-        atualizarTelas();
-        iniciarSincronizacaoAutomatica();
-    }
-
-    async function logout() {
-        await supabaseClient.auth.signOut();
+    function logout() {
         sessaoLogado = false;
         abaAtivaAtual = 'funcionarios';
         document.getElementById('loginScreen').classList.remove('hidden');
         document.getElementById('dashboard').classList.add('hidden');
         document.getElementById('passwordInput').value = '';
-        document.getElementById('usernameInput').value = '';
         document.getElementById('loginError').style.display = 'none';
     }
 
-    // Ao abrir o app: se já existe uma sessão salva, entra direto (continua logado)
-    async function verificarSessao() {
-        if (sessaoLogado) return;
-        try {
-            const { data } = await supabaseClient.auth.getSession();
-            if (data && data.session) {
-                entrarNoApp();
-            }
-        } catch (e) {
-            // sem sessão — mostra a tela de login normalmente
+    function verificarSessao() {
+        // Dentro do Claude, cada vez que o artifact abre, pede login novamente (por segurança)
+        if (sessaoLogado) {
+            document.getElementById('loginScreen').classList.add('hidden');
+            document.getElementById('dashboard').classList.remove('hidden');
+            carregarDados();
+            atualizarTelas();
+            iniciarSincronizacaoAutomatica();
         }
     }
 
@@ -2833,7 +2788,10 @@
     }
 
     // Debug na inicialização
-    console.log('🔐 Sistema de Relatórios Carregado (Supabase)');
+    console.log('🔐 Sistema de Relatórios Carregado');
+    console.log('Senha configurada:', SENHA);
+    console.log('Comprimento da senha:', SENHA.length);
+    console.log('Caracteres:', SENHA.split('').map((c, i) => `${i}: "${c}" (código: ${c.charCodeAt(0)})`).join(', '));
 
     function filtrarPagamentos() {
         const dataInicio = document.getElementById('pagDataInicio').value;
@@ -2942,7 +2900,12 @@
         }, 100);
     }
 
-    // Verificar sessão ao carregar a página (entra direto se já estiver logado)
+    // Verificar sessão ao carregar a página
+    document.addEventListener('DOMContentLoaded', function() {
+        verificarSessao();
+    });
+
+    // Também verificar imediatamente se o documento já foi carregado
     if (document.readyState === 'loading') {
         document.addEventListener('DOMContentLoaded', verificarSessao);
     } else {
