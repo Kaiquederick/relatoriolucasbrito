@@ -1764,17 +1764,9 @@
     let salvandoNaNuvem = false;
     let ultimaVersaoSalva = '';
 
-    // ✅ Indicador visual discreto de status (canto da tela)
+    // Indicador de status desativado (não aparece nada na tela)
     function mostrarStatusSync(texto, cor) {
-        let el = document.getElementById('statusSyncDebug');
-        if (!el) {
-            el = document.createElement('div');
-            el.id = 'statusSyncDebug';
-            el.style.cssText = 'position:fixed;bottom:6px;right:6px;background:rgba(0,0,0,0.75);color:white;padding:6px 10px;border-radius:6px;font-size:11px;z-index:99999;max-width:260px;font-family:monospace;';
-            document.body.appendChild(el);
-        }
-        el.style.borderLeft = `4px solid ${cor}`;
-        el.textContent = texto;
+        // Mensagens de sincronização ocultas a pedido do usuário
     }
 
     // Lê os dados do banco (Supabase) — linha unica id = 1
