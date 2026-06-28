@@ -8,6 +8,7 @@
     <meta name="theme-color" content="#1976d2">
     <title>Meus Relatórios - Lucas Brito</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
         * {
             margin: 0;
@@ -1750,11 +1751,15 @@
 
 <script>
     // ═══════════════════════════════════════════════════════════════
-    //  SINCRONIZAÇÃO (armazenamento próprio do Claude — sem cadastro)
-    //  Os dados ficam ligados à sua conta do Claude. Abrindo este
-    //  artifact em qualquer aparelho com a mesma conta, os dados
-    //  aparecem automaticamente sincronizados.
+    //  SINCRONIZAÇÃO VIA SUPABASE (banco de dados na nuvem)
+    //  Os dados ficam salvos no Supabase. Abrindo o site em qualquer
+    //  aparelho/navegador, os dados aparecem sincronizados.
+    //  Tabela: public.relatorios  (linha unica id = 1, coluna "dados" jsonb)
     // ═══════════════════════════════════════════════════════════════
+    const SUPABASE_URL = 'https://ijayesbharibpladmlyk.supabase.co';
+    const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImlqYXllc2JoYXJpYnBsYWRtbHlrIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODI2NTk2NzcsImV4cCI6MjA5ODIzNTY3N30.Fa_AkhLY1SBOfq-AVfRGtmV9ez4_pvV1AccWG35pbIw';
+    const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
     const CHAVE_STORAGE = 'allin_eventos_dados';
     let salvandoNaNuvem = false;
     let ultimaVersaoSalva = '';
@@ -1772,32 +1777,40 @@
         el.textContent = texto;
     }
 
-    // Lê os dados do armazenamento do Claude
+    // Lê os dados do banco (Supabase) — linha unica id = 1
     async function lerNuvem() {
         try {
-            const resultado = await window.storage.get(CHAVE_STORAGE, false);
-            if (resultado && resultado.value) {
+            const { data, error } = await sb
+                .from('relatorios')
+                .select('dados')
+                .eq('id', 1)
+                .maybeSingle();
+            if (error) throw error;
+            if (data && data.dados && data.dados.funcionarios) {
                 mostrarStatusSync('✅ Sincronizado ' + new Date().toLocaleTimeString(), '#27ae60');
-                return JSON.parse(resultado.value);
+                return data.dados;
             }
-        } catch (e) {
-            // Chave ainda não existe na primeira vez — normal
             mostrarStatusSync('ℹ️ Nenhum dado salvo ainda', '#3498db');
+        } catch (e) {
+            mostrarStatusSync('❌ Erro ao ler: ' + (e.message || e), '#e74c3c');
         }
         return null;
     }
 
-    // Salva os dados no armazenamento do Claude
+    // Salva os dados no banco (Supabase) — upsert na linha unica id = 1
     async function salvarNuvem() {
         if (salvandoNaNuvem) return;
         salvandoNaNuvem = true;
         try {
             const textoDados = JSON.stringify(dados);
-            await window.storage.set(CHAVE_STORAGE, textoDados, false);
+            const { error } = await sb
+                .from('relatorios')
+                .upsert({ id: 1, dados: dados, atualizado_em: new Date().toISOString() }, { onConflict: 'id' });
+            if (error) throw error;
             ultimaVersaoSalva = textoDados;
             mostrarStatusSync('✅ Salvo ' + new Date().toLocaleTimeString(), '#27ae60');
         } catch (e) {
-            mostrarStatusSync('❌ Erro ao salvar: ' + e.message, '#e74c3c');
+            mostrarStatusSync('❌ Erro ao salvar: ' + (e.message || e), '#e74c3c');
         } finally {
             salvandoNaNuvem = false;
         }
