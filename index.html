@@ -1907,9 +1907,9 @@
     const SENHA = 'Pedro2606';
     let dados = { 
         funcionarios: [
-            { id: 1, nome: 'João Silva', cpf: '123.456.789-00' },
-            { id: 2, nome: 'Maria Santos', cpf: '987.654.321-11' },
-            { id: 3, nome: 'Pedro Costa', cpf: '456.789.123-22' }
+            { id: 1, nome: 'João Silva' },
+            { id: 2, nome: 'Maria Santos' },
+            { id: 3, nome: 'Pedro Costa' }
         ], 
         pagamentos: [
             { id: 1, funcionarioId: 1, data: '2026-06-20', valor: 3500, descricao: 'Salário Junho' },
@@ -2025,7 +2025,6 @@
         document.getElementById('modalTitle').textContent = 'Novo Funcionário';
         document.getElementById('modalBody').innerHTML = `
             <div class="form-group"><label>Nome *</label><input type="text" id="funcNome"></div>
-            <div class="form-group"><label>CPF *</label><input type="text" id="funcCPF"></div>
             <button class="btn btn-primary" onclick="adicionarFuncionario()">Adicionar Funcionário</button>
         `;
         document.getElementById('modal').classList.add('show');
@@ -2033,9 +2032,8 @@
 
     function adicionarFuncionario() {
         const nome = document.getElementById('funcNome').value;
-        const cpf = document.getElementById('funcCPF').value;
-        if (!nome || !cpf) return;
-        dados.funcionarios.push({ id: Date.now(), nome, cpf });
+        if (!nome) return;
+        dados.funcionarios.push({ id: Date.now(), nome });
         salvarDados();
         closeModal();
     }
@@ -2290,7 +2288,6 @@
             doc.setFontSize(9);
             doc.setTextColor(90, 90, 90);
             doc.setFont(undefined, 'normal');
-            doc.text(`CPF: ${func.cpf}`, 20, y + 19);
             doc.setFont(undefined, 'bold');
             doc.setTextColor(25, 118, 210);
             doc.text(`Período: ${formatarData(dataInicio)} a ${formatarData(dataFim)}`, pageWidth - 20, y + 19, { align: 'right' });
@@ -2388,7 +2385,7 @@
 
     function atualizarTelas() {
         document.getElementById('totalFunc').textContent = dados.funcionarios.length;
-        document.getElementById('funcTable').innerHTML = dados.funcionarios.length === 0 ? '<div class="empty-state">Nenhum funcionário cadastrado. Comece adicionando um novo funcionário.</div>' : `<table><thead><tr><th>Nome</th><th>CPF</th><th style="text-align: center;">Ação</th></tr></thead><tbody>${dados.funcionarios.map(f => `<tr><td>${f.nome}</td><td>${f.cpf}</td><td style="text-align: center;"><button class="btn btn-danger" onclick="deletarFuncionarioComConfirmacao(${f.id})">🗑️ Deletar</button></td></tr>`).join('')}</tbody></table>`;
+        document.getElementById('funcTable').innerHTML = dados.funcionarios.length === 0 ? '<div class="empty-state">Nenhum funcionário cadastrado. Comece adicionando um novo funcionário.</div>' : `<table><thead><tr><th>Nome</th><th style="text-align: center;">Ação</th></tr></thead><tbody>${dados.funcionarios.map(f => `<tr><td>${f.nome}</td><td style="text-align: center;"><button class="btn btn-danger" onclick="deletarFuncionarioComConfirmacao(${f.id})">🗑️ Deletar</button></td></tr>`).join('')}</tbody></table>`;
 
         const totalPago = dados.pagamentos.reduce((sum, p) => sum + p.valor, 0);
         document.getElementById('totalPago').textContent = formatarMoeda(totalPago);
@@ -2398,7 +2395,7 @@
 
         document.getElementById('relFunc').textContent = dados.funcionarios.length;
         document.getElementById('relPago').textContent = formatarMoeda(totalPago);
-        document.getElementById('relTable').innerHTML = `<table><thead><tr><th>Funcionário</th><th>CPF</th><th>Total Pago</th><th style="text-align: center;">Qtd. Pagamentos</th></tr></thead><tbody>${dados.funcionarios.map(func => { const totalFunc = dados.pagamentos.filter(p => p.funcionarioId == func.id).reduce((sum, p) => sum + p.valor, 0); const numPag = dados.pagamentos.filter(p => p.funcionarioId == func.id).length; return `<tr><td><strong>${func.nome}</strong></td><td>${func.cpf}</td><td>${formatarMoeda(totalFunc)}</td><td style="text-align: center;"><strong>${numPag}</strong></td></tr>`; }).join('')}</tbody></table>`;
+        document.getElementById('relTable').innerHTML = `<table><thead><tr><th>Funcionário</th><th>Total Pago</th><th style="text-align: center;">Qtd. Pagamentos</th></tr></thead><tbody>${dados.funcionarios.map(func => { const totalFunc = dados.pagamentos.filter(p => p.funcionarioId == func.id).reduce((sum, p) => sum + p.valor, 0); const numPag = dados.pagamentos.filter(p => p.funcionarioId == func.id).length; return `<tr><td><strong>${func.nome}</strong></td><td>${formatarMoeda(totalFunc)}</td><td style="text-align: center;"><strong>${numPag}</strong></td></tr>`; }).join('')}</tbody></table>`;
 
         // Atualizar Despesas
         const totalDesp = dados.despesas.reduce((sum, d) => sum + d.valor, 0);
@@ -2525,8 +2522,7 @@
             doc.rect(15, y - 6, pageWidth - 30, 10, 'F');
             
             doc.text('FUNCIONÁRIO', 20, y + 1);
-            doc.text('CPF', 100, y + 1);
-            doc.text('DATA PAGAMENTO', 130, y + 1);
+            doc.text('DATA PAGAMENTO', 110, y + 1);
             doc.text('VALOR (R$)', pageWidth - 20, y + 1, { align: 'right' });
             
             y += 14;
@@ -2560,9 +2556,8 @@
                 doc.rect(15, y - 5, pageWidth - 30, 8);
 
                 doc.setTextColor(51, 51, 51);
-                doc.text(func.nome.substring(0, 28), 20, y);
-                doc.text(func.cpf, 100, y);
-                doc.text(formatarData(pagamentosFiltrados[0]?.data || dataInicio), 130, y);
+                doc.text(func.nome.substring(0, 40), 20, y);
+                doc.text(formatarData(pagamentosFiltrados[0]?.data || dataInicio), 110, y);
                 doc.text(`R$ ${totalFunc.toFixed(2).replace('.', ',')}`, pageWidth - 20, y, { align: 'right' });
                 
                 y += 8;
@@ -2582,8 +2577,7 @@
                     doc.setTextColor(255, 255, 255);
                     doc.rect(15, y - 6, pageWidth - 30, 10, 'F');
                     doc.text('FUNCIONÁRIO', 20, y + 1);
-                    doc.text('CPF', 100, y + 1);
-                    doc.text('DATA PAGAMENTO', 130, y + 1);
+                    doc.text('DATA PAGAMENTO', 110, y + 1);
                     doc.text('VALOR (R$)', pageWidth - 20, y + 1, { align: 'right' });
                     doc.setTextColor(51, 51, 51);
                     y += 14;
